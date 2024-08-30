@@ -16,6 +16,30 @@ variable "public_subnet_ids" {
   default     = []
 }
 
+variable "vpc_cidr" {
+  description = "CIDR block for VPC"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+variable "private_subnet_cidrs" {
+  description = "List of 2 CIDRs for private subnets. Only 2 are supported"
+  type = list(string)
+  default = ["10.0.0.0/19", "10.0.32.0/19"]
+}
+
+variable "public_subnet_cidrs" {
+  description = "List of 2 CIDRs for public subnets. Only 2 are supported"
+  type = list(string)
+  default = ["10.0.144.0/20", "10.0.128.0/20"]
+}
+
+variable "zones" {
+  description = "List of 2 availability zones to create VPC in. Only 2 are supported"
+  type        = list(string)
+  default = ["us-east-1a", "us-east-1b"]
+}
+
 variable "public_access_enable" {
   description = "Whether cluster should be publicly accessible or not"
   type        = bool
