@@ -24,20 +24,20 @@ variable "vpc_cidr" {
 
 variable "private_subnet_cidrs" {
   description = "List of 2 CIDRs for private subnets. Only 2 are supported"
-  type = list(string)
-  default = ["10.0.0.0/19", "10.0.32.0/19"]
+  type        = list(string)
+  default     = ["10.0.0.0/19", "10.0.32.0/19"]
 }
 
 variable "public_subnet_cidrs" {
   description = "List of 2 CIDRs for public subnets. Only 2 are supported"
-  type = list(string)
-  default = ["10.0.144.0/20", "10.0.128.0/20"]
+  type        = list(string)
+  default     = ["10.0.144.0/20", "10.0.128.0/20"]
 }
 
 variable "zones" {
   description = "List of 2 availability zones to create VPC in. Only 2 are supported"
   type        = list(string)
-  default = ["us-east-1a", "us-east-1b"]
+  default     = ["us-east-1a", "us-east-1b"]
 }
 
 variable "public_access_enable" {
@@ -89,16 +89,16 @@ variable "nodes_count" {
 }
 
 variable "ami_id" {
-  description = "AMI to be provisioned, if empty, should default to latest"
+  description = "AMI to be used in deployment, if empty, should default to latest"
   type        = string
-  default     = ""
+  # default     = ""
 }
 
-variable "gridgain_version" {
-  description = "GridGain version to use when searching for AMI"
-  type        = string
-  default     = "8.9.9"
-}
+# variable "gridgain_version" {
+#   description = "GridGain version to use when searching for AMI"
+#   type        = string
+#   default     = "8.9.9"
+# }
 
 variable "fullname" {
   description = "Full name to be used in description of all resources"

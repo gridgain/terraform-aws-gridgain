@@ -2,6 +2,10 @@ locals {
   create_vpc           = var.vpc_id == ""
   az_count             = local.create_vpc ? 2 : 0
   public_access_enable = local.create_vpc ? var.public_access_enable : false
+
+  vpc_id          = local.create_vpc ? aws_vpc.vpc[0].id : var.vpc_id
+  private_subnets = local.create_vpc ? aws_subnet.private[*].id : var.private_subnet_ids
+  public_subnets  = local.create_vpc ? aws_subnet.public[*].id : var.public_subnet_ids
 }
 
 /* Routing table for internet gateway */
@@ -56,7 +60,7 @@ resource "aws_route_table" "rtbl" {
 /* Routing table associations for subnets */
 resource "aws_route_table_association" "rtbla" {
   count          = local.az_count
-  subnet_id      = element(aws_subnet.subnet.*.id, count.index)
+  subnet_id      = element(aws_subnet.private.*.id, count.index)
   route_table_id = element(aws_route_table.rtbl.*.id, count.index)
 }
 
@@ -107,6 +111,8 @@ resource "aws_vpc" "vpc" {
   count                = local.create_vpc ? 1 : 0
   enable_dns_hostnames = true
   enable_dns_support   = true
+
+  cidr_block = var.vpc_cidr
 
   tags = merge(
     local.tags,

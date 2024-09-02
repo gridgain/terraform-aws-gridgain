@@ -1,28 +1,26 @@
 locals {
-  name           = "${var.name}-nodes-asg"
-  description    = "${var.fullname} nodes ASG"
-  ami_id         = var.ami_id
-  subnets        = var.private_subnet_ids
-  security_group = "sg-12345678"
-  tags           = var.tags
+  asg_name        = "${var.name}-nodes-asg"
+  asg_description = "${var.fullname} nodes ASG"
+  ami_id          = var.ami_id
+  tags            = var.tags
 }
 
 module "gridgain-nodes-asg" {
   source = "terraform-aws-modules/autoscaling/aws"
 
   # Autoscaling group
-  name = local.name
+  name = local.asg_name
 
   min_size                  = var.nodes_count
   max_size                  = var.nodes_count
   desired_capacity          = var.nodes_count
   wait_for_capacity_timeout = 0
   health_check_type         = "EC2"
-  vpc_zone_identifier       = local.subnets
+  vpc_zone_identifier       = local.private_subnets
 
   # Launch template
-  launch_template_name        = local.name
-  launch_template_description = local.description
+  launch_template_name        = local.asg_name
+  launch_template_description = local.asg_description
   update_default_version      = true
 
   image_id          = local.ami_id
@@ -61,7 +59,7 @@ module "gridgain-nodes-asg" {
       delete_on_termination = true
       description           = "eth0"
       device_index          = 0
-      security_groups       = [local.security_group]
+      security_groups       = [aws_security_group.this.id]
     }
   ]
 
