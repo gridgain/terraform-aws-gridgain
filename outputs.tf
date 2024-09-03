@@ -33,12 +33,6 @@ output "public_ips" {
   value       = aws_instance.this.*.public_ip
 }
 
-output "private_key" {
-  description = "SSH private key that can be used to connect to instances"
-  value       = module.key_pair.private_key_pem
-  sensitive   = true
-}
-
 output "s3_bucket" {
   description = "Name of S3 bucket used for snapshots"
   value       = local.s3_bucket

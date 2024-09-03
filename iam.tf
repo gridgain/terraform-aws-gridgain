@@ -1,10 +1,13 @@
+data "aws_partition" "current" {}
+
 data "aws_iam_policy_document" "assume-role" {
   statement {
+    sid     = "EC2AssumeRole"
     actions = ["sts:AssumeRole"]
 
     principals {
       type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
+      identifiers = ["ec2.${data.aws_partition.current.dns_suffix}"]
     }
   }
 }
@@ -66,6 +69,11 @@ resource "aws_iam_role_policy_attachment" "this" {
   policy_arn = aws_iam_policy.this.arn
 }
 
+resource "aws_iam_role_policy_attachment" "ssm" {
+  role       =  aws_iam_role.this.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
 resource "aws_iam_instance_profile" "this" {
   name = "${var.name}-iam-profile"
   role = aws_iam_role.this.name
@@ -74,4 +82,8 @@ resource "aws_iam_instance_profile" "this" {
     Name        = "${var.name}-iam-profile",
     Description = "IAM InstanceProfile for ${var.fullname}"
   })
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
