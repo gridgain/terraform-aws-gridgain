@@ -23,7 +23,7 @@ module "s3_bucket" {
     rule = {
       apply_server_side_encryption_by_default = {
         sse_algorithm     = "aws:kms"
-        kms_master_key_id = local.create_kms_key ? module.kms.key_id : data.aws_kms_key.kms[0].id
+        kms_master_key_id = local.kms_key_id
       }
     }
   }

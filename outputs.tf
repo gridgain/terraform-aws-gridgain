@@ -13,19 +13,30 @@ output "public_subnet_ids" {
   value       = local.public_subnets
 }
 
-output "domains" {
-  description = "List of aws-provided domains for GridGain nodes"
-  value       = []
+output "private_domains" {
+  description = "List of aws-provided private domains for GridGain nodes"
+  value       = aws_instance.this.*.private_dns
+}
+
+output "public_domains" {
+  description = "List of aws-provided public domains for GridGain nodes"
+  value       = aws_instance.this.*.public_dns
 }
 
 output "private_ips" {
   description = "List of private IPs of GridGain nodes"
-  value       = []
+  value       = aws_instance.this.*.private_ip
 }
 
 output "public_ips" {
   description = "List of public IPs of GridGain nodes"
-  value       = []
+  value       = aws_instance.this.*.public_ip
+}
+
+output "private_key" {
+  description = "SSH private key that can be used to connect to instances"
+  value       = module.key_pair.private_key_pem
+  sensitive   = true
 }
 
 output "s3_bucket" {

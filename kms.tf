@@ -4,6 +4,7 @@ locals {
   create_kms_key = local.create_s3_bucket ? var.kms_key_alias == "" : false
   kms_key_arn    = local.create_kms_key ? module.kms.key_arn : data.aws_kms_key.kms[0].arn
   kms_key_alias  = local.create_kms_key ? keys(module.kms.aliases)[0] : var.kms_key_alias
+  kms_key_id     = local.create_kms_key ? module.kms.key_id : data.aws_kms_key.kms[0].id
 }
 
 data "aws_kms_key" "kms" {

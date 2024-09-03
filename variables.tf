@@ -82,6 +82,30 @@ variable "root_volume_size" {
   default     = 50
 }
 
+variable "root_volume_type" {
+  description = "Type of root volume for GridGain nodes"
+  type        = string
+  default     = "gp2"
+}
+
+variable "root_volume_throughput" {
+  description = "Root volume throughput in MB/s"
+  type = number
+  default = null
+}
+
+variable "root_volume_iops" {
+  description = "Amount of provisioned IOPS for root volume"
+  type = number
+  default = null
+}
+
+variable "root_volume_delete_on_termination" {
+  description = "Whether the volume should be destroyed on GridGain nodes termination"
+  type = bool
+  default = true
+}
+
 variable "nodes_count" {
   description = "Number of nodes"
   type        = number
