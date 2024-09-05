@@ -12,6 +12,7 @@
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | AMI to be used in deployment, if empty, should default to latest | `string` | n/a | yes |
+| <a name="input_enable_ssm"></a> [enable\_ssm](#input\_enable\_ssm) | Enable secure session manager | `bool` | `true` | no |
 | <a name="input_fullname"></a> [fullname](#input\_fullname) | Full name to be used in description of all resources | `string` | `"GridGain Cluster"` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | Instance type to be used for GridGain nodes | `string` | `"t3.micro"` | no |
 | <a name="input_kms_key_alias"></a> [kms\_key\_alias](#input\_kms\_key\_alias) | KMS Key alias to be used with S3 bucket for encryption. If empty, module will create a new one | `string` | `""` | no |
@@ -30,6 +31,7 @@
 | <a name="input_root_volume_throughput"></a> [root\_volume\_throughput](#input\_root\_volume\_throughput) | Root volume throughput in MB/s | `number` | `null` | no |
 | <a name="input_root_volume_type"></a> [root\_volume\_type](#input\_root\_volume\_type) | Type of root volume for GridGain nodes | `string` | `"gp2"` | no |
 | <a name="input_s3_bucket"></a> [s3\_bucket](#input\_s3\_bucket) | Name of s3 bucket to use. If empty, module will create a new one | `string` | `""` | no |
+| <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key) | SSH public key used to connect to instances. If empty, none will be provisioned | `string` | `""` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of additional tags to assign to resources | `map(string)` | `{}` | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | CIDR block for VPC | `string` | `"10.0.0.0/16"` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID to be deployed into. If empty, module should provision new VPC | `string` | `""` | no |

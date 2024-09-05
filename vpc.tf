@@ -5,7 +5,8 @@ locals {
   vpc_id          = local.create_vpc ? aws_vpc.vpc[0].id : var.vpc_id
   private_subnets = local.create_vpc ? aws_subnet.private[*].id : var.private_subnet_ids
   public_subnets  = local.create_vpc ? aws_subnet.public[*].id : var.public_subnet_ids
-  subnets         = var.public_access_enable ? local.public_subnets : local.private_subnets
+  # subnets         = var.public_access_enable ? local.public_subnets : local.private_subnets
+  subnets = local.private_subnets
 }
 
 /* Routing table for internet gateway */

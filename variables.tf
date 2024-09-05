@@ -124,6 +124,18 @@ variable "ami_id" {
 #   default     = "8.9.9"
 # }
 
+variable "ssh_public_key" {
+  description = "SSH public key used to connect to instances. If empty, none will be provisioned"
+  type        = string
+  default     = ""
+}
+
+variable "enable_ssm" {
+  description = "Enable secure session manager"
+  type        = bool
+  default     = true
+}
+
 variable "fullname" {
   description = "Full name to be used in description of all resources"
   type        = string
