@@ -31,7 +31,7 @@ resource "aws_security_group" "this" {
   tags = merge(
     local.tags,
     {
-      Name      = "${var.name}-sg"
+      Name        = "${var.name}-sg"
       Description = "Controls access to ${var.fullname} instance",
     }
   )

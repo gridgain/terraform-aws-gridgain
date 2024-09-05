@@ -4,14 +4,8 @@ variable "vpc_id" {
   default     = ""
 }
 
-variable "private_subnet_ids" {
+variable "subnet_ids" {
   description = "List of private subnet IDs to be used for deployment. If empty, module should provision new subnets"
-  type        = list(string)
-  default     = []
-}
-
-variable "public_subnet_ids" {
-  description = "List of public subnet IDs to be used for deployment. If empty and public access enabled, module should provision new subnets"
   type        = list(string)
   default     = []
 }
@@ -22,16 +16,10 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "private_subnet_cidrs" {
+variable "subnet_cidrs" {
   description = "List of 2 CIDRs for private subnets. Only 2 are supported"
   type        = list(string)
   default     = ["10.0.0.0/19", "10.0.32.0/19"]
-}
-
-variable "public_subnet_cidrs" {
-  description = "List of 2 CIDRs for public subnets. Only 2 are supported"
-  type        = list(string)
-  default     = ["10.0.144.0/20", "10.0.128.0/20"]
 }
 
 variable "zones" {
@@ -90,20 +78,20 @@ variable "root_volume_type" {
 
 variable "root_volume_throughput" {
   description = "Root volume throughput in MB/s"
-  type = number
-  default = null
+  type        = number
+  default     = null
 }
 
 variable "root_volume_iops" {
   description = "Amount of provisioned IOPS for root volume"
-  type = number
-  default = null
+  type        = number
+  default     = null
 }
 
 variable "root_volume_delete_on_termination" {
   description = "Whether the volume should be destroyed on GridGain nodes termination"
-  type = bool
-  default = true
+  type        = bool
+  default     = true
 }
 
 variable "nodes_count" {
@@ -130,7 +118,7 @@ variable "ssh_public_key" {
   default     = ""
 }
 
-variable "enable_ssm" {
+variable "ssm_enable" {
   description = "Enable secure session manager"
   type        = bool
   default     = true

@@ -2,6 +2,8 @@ locals {
   az_count = 2
   ami_id   = var.ami_id
   tags     = var.tags
+
+  ssm_endpoints = ["ssm", "ssmmessages", "ec2messages"]
 }
 
 data "aws_region" "this" {}
@@ -52,4 +54,60 @@ resource "aws_instance" "this" {
   volume_tags = merge({
     "Name" = "${var.name}-volume-${count.index}",
   }, local.tags)
+}
+
+resource "aws_vpc_endpoint" "this" {
+  for_each = toset([
+    for service in local.ssm_endpoints : service
+    if var.ssm_enable
+  ])
+
+  vpc_id     = local.vpc_id
+  subnet_ids = local.subnets
+
+  security_group_ids = [
+    aws_security_group.ssm[0].id,
+  ]
+
+  service_name      = "com.amazonaws.${data.aws_region.this.name}.${each.value}"
+  vpc_endpoint_type = "Interface"
+
+  private_dns_enabled = true
+
+  tags = merge(var.tags, { Name = "${each.value} SSM Endpoint" })
+}
+
+resource "aws_security_group" "ssm" {
+  count       = var.ssm_enable ? 1 : 0
+  name_prefix = "ssm-vpc-endpoints-"
+  description = "VPC endpoint security group"
+  vpc_id      = local.vpc_id
+
+  tags = var.tags
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_security_group_rule" "sg_ingress_endpoints" {
+  count             = var.ssm_enable ? 1 : 0
+  description       = "ingress-tcp-443-from-subnets"
+  security_group_id = aws_security_group.ssm[0].id
+  protocol          = "tcp"
+  from_port         = 443
+  to_port           = 443
+  type              = "ingress"
+  cidr_blocks       = [var.vpc_cidr]
+}
+
+resource "aws_security_group_rule" "sg_egress" {
+  count             = var.ssm_enable ? 1 : 0
+  description       = "egress-tcp-443"
+  security_group_id = aws_security_group.ssm[0].id
+  protocol          = "tcp"
+  from_port         = 443
+  to_port           = 443
+  type              = "egress"
+  cidr_blocks       = ["0.0.0.0/0"]
 }

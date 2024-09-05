@@ -1,17 +1,12 @@
 locals {
   create_vpc           = var.vpc_id == ""
-  public_access_enable = local.create_vpc ? var.public_access_enable : false
-
-  vpc_id          = local.create_vpc ? aws_vpc.vpc[0].id : var.vpc_id
-  private_subnets = local.create_vpc ? aws_subnet.private[*].id : var.private_subnet_ids
-  public_subnets  = local.create_vpc ? aws_subnet.public[*].id : var.public_subnet_ids
-  # subnets         = var.public_access_enable ? local.public_subnets : local.private_subnets
-  subnets = local.private_subnets
+  vpc_id  = local.create_vpc ? aws_vpc.vpc[0].id : var.vpc_id
+  subnets = local.create_vpc ? aws_subnet.subnet[*].id : var.subnet_ids
 }
 
 /* Routing table for internet gateway */
 resource "aws_route_table" "igw_rtbl" {
-  count  = local.public_access_enable ? 1 : 0
+  count  = local.create_vpc ? 1 : 0
   vpc_id = aws_vpc.vpc[0].id
 
   tags = merge(
@@ -24,7 +19,7 @@ resource "aws_route_table" "igw_rtbl" {
 }
 
 resource "aws_route_table_association" "igw_rtbla" {
-  count          = local.public_access_enable ? 1 : 0
+  count  = local.create_vpc ? 1 : 0
   gateway_id     = aws_internet_gateway.igw[0].id
   route_table_id = aws_route_table.igw_rtbl[0].id
 }
@@ -32,7 +27,7 @@ resource "aws_route_table_association" "igw_rtbla" {
 # The default route, mapping the VPC's CIDR block to "local", is created implicitly and cannot be specified.
 /* Internet gateway for the public subnet */
 resource "aws_internet_gateway" "igw" {
-  count  = local.public_access_enable ? 1 : 0
+  count  = local.create_vpc ? 1 : 0
   vpc_id = aws_vpc.vpc[0].id
 
   tags = merge(
@@ -61,41 +56,24 @@ resource "aws_route_table" "rtbl" {
 /* Routing table associations for subnets */
 resource "aws_route_table_association" "rtbla" {
   count          = local.create_vpc ? local.az_count : 0
-  subnet_id      = element(aws_subnet.private.*.id, count.index)
+  subnet_id      = element(aws_subnet.subnet.*.id, count.index)
   route_table_id = element(aws_route_table.rtbl.*.id, count.index)
 }
 
 /* Default route to IGW */
 resource "aws_route" "pub_igw_rtblr" {
-  count                  = local.public_access_enable ? local.az_count : 0
+  count                  = local.create_vpc ? local.az_count : 0
   route_table_id         = element(aws_route_table.rtbl.*.id, count.index)
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.igw[0].id
 }
 
 /* Subnet */
-resource "aws_subnet" "public" {
-  count  = local.public_access_enable ? local.az_count : 0
-  vpc_id = aws_vpc.vpc[0].id
-
-  cidr_block              = var.public_subnet_cidrs[count.index]
-  availability_zone       = var.zones[count.index]
-  map_public_ip_on_launch = true
-
-  tags = merge(
-    local.tags,
-    {
-      Name        = "${var.name}-${var.zones[count.index]}-subnet",
-      Description = "${var.fullname} public subnet"
-    }
-  )
-}
-
-resource "aws_subnet" "private" {
+resource "aws_subnet" "subnet" {
   count  = local.create_vpc ? local.az_count : 0
   vpc_id = aws_vpc.vpc[0].id
 
-  cidr_block              = var.private_subnet_cidrs[count.index]
+  cidr_block              = var.subnet_cidrs[count.index]
   availability_zone       = var.zones[count.index]
   map_public_ip_on_launch = false
 
@@ -103,7 +81,7 @@ resource "aws_subnet" "private" {
     local.tags,
     {
       Name        = "${var.name}-${var.zones[count.index]}-subnet",
-      Description = "${var.fullname} private subnet"
+      Description = "${var.fullname} subnet"
     }
   )
 }

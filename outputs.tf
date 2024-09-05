@@ -3,14 +3,9 @@ output "vpc_id" {
   value       = local.vpc_id
 }
 
-output "private_subnet_ids" {
+output "subnet_ids" {
   description = "List of private subent IDs"
-  value       = local.private_subnets
-}
-
-output "public_subnet_ids" {
-  description = "List of public subent IDs"
-  value       = local.public_subnets
+  value       = local.subnets
 }
 
 output "private_domains" {
