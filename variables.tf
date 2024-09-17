@@ -141,3 +141,31 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "gridgain_license" {
+  description = "GridGain license xml"
+  type        = string
+}
+
+variable "gridgain_config" {
+  description = "GridGain config xml"
+  type        = string
+}
+
+variable "gridgain_ssl_cert" {
+  description = "GridGain SSL certificate"
+  type        = string
+  default     = ""
+}
+
+variable "gridgain_ssl_key" {
+  description = "GridGain SSL key"
+  type        = string
+  default     = ""
+}
+
+variable "keystore_password" {
+  description = "SSL Keystore password"
+  type        = string
+  default     = ""
+}

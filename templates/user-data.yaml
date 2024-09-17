@@ -1,0 +1,32 @@
+#cloud-config
+# vim: syntax=yaml
+
+write_files:
+  - path: /opt/gridgain/config/license.xml
+    encoding: gzip
+    content: !!binary |
+      ${gridgain_license}
+  - path: /opt/gridgain/config/server.xml
+    encoding: gzip
+    content: !!binary |
+      ${gridgain_config}
+  - path: /opt/gridgain/ssl/server.crt
+    encoding: gzip
+    content: !!binary |
+      ${gridgain_ssl_cert}
+  - path: /opt/gridgain/ssl/server.key
+    encoding: gzip
+    content: !!binary |
+      ${gridgain_ssl_key}
+  - path: /opt/gridgain/config/service.properties.override
+    content: |
+EXTRA_OPTS=-Djava.rmi.server.hostname=${tostring(public_ip)} \
+-Djavax.net.ssl.keyStorePassword=${keystore_password}
+
+runcmd:
+  - openssl pkcs12 -export -in /opt/gridgain/ssl/server.crt -inkey /opt/gridgain/ssl/server.key -name root -out /opt/gridgain/ssl/server.p12 -password pass:${keystore_password}
+  - ln -s /opt/gridgain/ssl/server.p12 /opt/gridgain/ssl/server.jks
+  - chown gg_rw_user:gg_rw_group /opt/gridgain/config/* /opt/gridgain/ssl/*
+  - chmod 0640 /opt/gridgain/config/* /opt/gridgain/ssl/*
+  - rm -f /opt/gridgain/ssl/server.crt /opt/gridgain/ssl/server.key
+  - systemctl restart gridgain

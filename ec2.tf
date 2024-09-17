@@ -4,6 +4,14 @@ locals {
   tags     = var.tags
 
   ssm_endpoints = ["ssm", "ssmmessages", "ec2messages"]
+
+  public_ips  = var.public_access_enable ? [aws_eip.eip.*.public_ip] : []
+  private_ips = flatten(aws_network_interface.eni.*.private_ips)
+  ip_zip = [for i in range(var.nodes_count) : {
+    public_ip  = var.public_access_enable ? aws_eip.eip[i].public_ip : tostring(i),
+    private_ip = element(tolist(aws_network_interface.eni[i].private_ips), 0)
+  }]
+  ip_map = { for item in local.ip_zip : item.public_ip => item.private_ip }
 }
 
 data "aws_region" "this" {}
@@ -14,22 +22,57 @@ resource "aws_key_pair" "this" {
   public_key = var.ssh_public_key
 }
 
+resource "aws_network_interface" "eni" {
+  count           = var.nodes_count
+  subnet_id       = local.subnets[count.index % local.az_count]
+  security_groups = [aws_security_group.this.id]
+
+  tags = merge(local.tags, {
+    Name = "${var.name}-${count.index}-ec2"
+  })
+}
+
+resource "aws_eip" "eip" {
+  count  = var.public_access_enable ? var.nodes_count : 0
+  domain = "vpc"
+}
+
+resource "aws_eip_association" "eipa" {
+  count                = var.public_access_enable ? var.nodes_count : 0
+  allocation_id        = aws_eip.eip[count.index].id
+  network_interface_id = aws_network_interface.eni[count.index].id
+}
+
+
 resource "aws_instance" "this" {
   count = var.nodes_count
 
   ami           = local.ami_id
   instance_type = var.instance_type
-  # user_data   = var.user_data
 
-  availability_zone      = var.zones[count.index % local.az_count]
-  subnet_id              = local.subnets[count.index % local.az_count]
-  vpc_security_group_ids = [aws_security_group.this.id]
+  user_data = templatefile("${path.module}/templates/user-data.yaml", {
+    gridgain_license  = base64gzip(var.gridgain_license),
+    gridgain_config   = base64gzip(var.gridgain_config),
+    gridgain_ssl_cert = base64gzip(var.gridgain_ssl_cert),
+    gridgain_ssl_key  = base64gzip(var.gridgain_ssl_key),
+    keystore_password = var.keystore_password
+    public_ip         = var.public_access_enable ? tostring(aws_eip.eip[count.index].public_ip) : ""
+    public_ips        = local.public_ips
+    private_ips       = local.private_ips
+    node_id           = tostring(count.index)
+  })
+  user_data_replace_on_change = true
+  availability_zone           = var.zones[count.index % local.az_count]
 
   key_name             = var.ssh_public_key != "" ? aws_key_pair.this[0].key_name : null
   monitoring           = true
   iam_instance_profile = aws_iam_instance_profile.this.name
 
-  associate_public_ip_address = var.public_access_enable
+  network_interface {
+    device_index          = 0
+    network_interface_id  = aws_network_interface.eni[count.index].id
+    delete_on_termination = false
+  }
 
   root_block_device {
     encrypted   = true
@@ -48,12 +91,12 @@ resource "aws_instance" "this" {
     http_put_response_hop_limit = 1
   }
 
-  tags = merge({
+  tags = merge(local.tags, {
     "Name" = "${var.name}-node-${count.index}",
-  }, local.tags)
-  volume_tags = merge({
+  })
+  volume_tags = merge(local.tags, {
     "Name" = "${var.name}-volume-${count.index}",
-  }, local.tags)
+  })
 }
 
 resource "aws_vpc_endpoint" "this" {
@@ -74,7 +117,9 @@ resource "aws_vpc_endpoint" "this" {
 
   private_dns_enabled = true
 
-  tags = merge(var.tags, { Name = "${each.value} SSM Endpoint" })
+  tags = merge(local.tags, {
+    Name = "${each.value} SSM Endpoint"
+  })
 }
 
 resource "aws_security_group" "ssm" {
@@ -83,7 +128,7 @@ resource "aws_security_group" "ssm" {
   description = "VPC endpoint security group"
   vpc_id      = local.vpc_id
 
-  tags = var.tags
+  tags = local.tags
 
   lifecycle {
     create_before_destroy = true

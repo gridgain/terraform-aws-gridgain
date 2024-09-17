@@ -1,7 +1,7 @@
 locals {
-  create_vpc           = var.vpc_id == ""
-  vpc_id  = local.create_vpc ? aws_vpc.vpc[0].id : var.vpc_id
-  subnets = local.create_vpc ? aws_subnet.subnet[*].id : var.subnet_ids
+  create_vpc = var.vpc_id == ""
+  vpc_id     = local.create_vpc ? aws_vpc.vpc[0].id : var.vpc_id
+  subnets    = local.create_vpc ? aws_subnet.subnet[*].id : var.subnet_ids
 }
 
 /* Routing table for internet gateway */
@@ -9,17 +9,14 @@ resource "aws_route_table" "igw_rtbl" {
   count  = local.create_vpc ? 1 : 0
   vpc_id = aws_vpc.vpc[0].id
 
-  tags = merge(
-    local.tags,
-    {
-      Name        = "${var.name}-igw-rtbl",
-      Description = "${var.fullname} IGW routing table"
-    }
-  )
+  tags = merge(local.tags, {
+    Name        = "${var.name}-igw-rtbl",
+    Description = "${var.fullname} IGW routing table"
+  })
 }
 
 resource "aws_route_table_association" "igw_rtbla" {
-  count  = local.create_vpc ? 1 : 0
+  count          = local.create_vpc ? 1 : 0
   gateway_id     = aws_internet_gateway.igw[0].id
   route_table_id = aws_route_table.igw_rtbl[0].id
 }
@@ -30,13 +27,10 @@ resource "aws_internet_gateway" "igw" {
   count  = local.create_vpc ? 1 : 0
   vpc_id = aws_vpc.vpc[0].id
 
-  tags = merge(
-    local.tags,
-    {
-      Name        = "${var.name}-igw",
-      Description = "${var.fullname} IGW"
-    }
-  )
+  tags = merge(local.tags, {
+    Name        = "${var.name}-igw",
+    Description = "${var.fullname} IGW"
+  })
 }
 
 /* Routing table for subnets */
@@ -44,13 +38,10 @@ resource "aws_route_table" "rtbl" {
   count  = local.create_vpc ? local.az_count : 0
   vpc_id = aws_vpc.vpc[0].id
 
-  tags = merge(
-    local.tags,
-    {
-      Name        = "${var.name}-${var.zones[count.index]}-rtbl",
-      Description = "${var.fullname} PVT routing table ${var.zones[count.index]}"
-    }
-  )
+  tags = merge(local.tags, {
+    Name        = "${var.name}-${var.zones[count.index]}-rtbl",
+    Description = "${var.fullname} PVT routing table ${var.zones[count.index]}"
+  })
 }
 
 /* Routing table associations for subnets */
@@ -77,13 +68,10 @@ resource "aws_subnet" "subnet" {
   availability_zone       = var.zones[count.index]
   map_public_ip_on_launch = false
 
-  tags = merge(
-    local.tags,
-    {
-      Name        = "${var.name}-${var.zones[count.index]}-subnet",
-      Description = "${var.fullname} subnet"
-    }
-  )
+  tags = merge(local.tags, {
+    Name        = "${var.name}-${var.zones[count.index]}-subnet",
+    Description = "${var.fullname} subnet"
+  })
 }
 
 resource "aws_vpc" "vpc" {
@@ -93,11 +81,8 @@ resource "aws_vpc" "vpc" {
 
   cidr_block = var.vpc_cidr
 
-  tags = merge(
-    local.tags,
-    {
-      Name        = "${var.name}-vpc"
-      Description = "${var.fullname} VPC"
-    }
-  )
+  tags = merge(local.tags, {
+    Name        = "${var.name}-vpc"
+    Description = "${var.fullname} VPC"
+  })
 }

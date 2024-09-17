@@ -28,13 +28,10 @@ resource "aws_security_group" "this" {
   description = "Controls access to ${var.fullname} instance"
   vpc_id      = local.vpc_id
 
-  tags = merge(
-    local.tags,
-    {
-      Name        = "${var.name}-sg"
-      Description = "Controls access to ${var.fullname} instance",
-    }
-  )
+  tags = merge(local.tags, {
+    Name        = "${var.name}-sg"
+    Description = "Controls access to ${var.fullname} instance",
+  })
 }
 
 resource "aws_security_group_rule" "ingress" {
