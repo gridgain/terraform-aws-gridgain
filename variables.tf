@@ -61,7 +61,7 @@ variable "kms_key_alias" {
 variable "instance_type" {
   description = "Instance type to be used for GridGain nodes"
   type        = string
-  default     = "t3.micro"
+  default     = "t3.medium"
 }
 
 variable "root_volume_size" {
@@ -124,6 +124,18 @@ variable "ssm_enable" {
   default     = true
 }
 
+variable "cloudwatch_logs_enable" {
+  description = "Enable sending logs to Cloudwatch Logs"
+  type        = bool
+  default     = false
+}
+
+variable "cloudwatch_loggroup_name" {
+  description = "Name of Cloudwatch Log Group to send logs to"
+  type        = string
+  default     = "/aws/gridgain"
+}
+
 variable "fullname" {
   description = "Full name to be used in description of all resources"
   type        = string
@@ -150,6 +162,12 @@ variable "gridgain_license" {
 variable "gridgain_config" {
   description = "GridGain config xml"
   type        = string
+}
+
+variable "ssl_enable" {
+  description = "Whether SSL should be enabled"
+  type        = bool
+  default     = false
 }
 
 variable "gridgain_ssl_cert" {

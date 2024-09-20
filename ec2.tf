@@ -5,7 +5,7 @@ locals {
 
   ssm_endpoints = ["ssm", "ssmmessages", "ec2messages"]
 
-  public_ips  = var.public_access_enable ? [aws_eip.eip.*.public_ip] : []
+  public_ips  = var.public_access_enable ? flatten(aws_eip.eip.*.public_ip) : []
   private_ips = flatten(aws_network_interface.eni.*.private_ips)
   ip_zip = [for i in range(var.nodes_count) : {
     public_ip  = var.public_access_enable ? aws_eip.eip[i].public_ip : tostring(i),
@@ -51,15 +51,19 @@ resource "aws_instance" "this" {
   instance_type = var.instance_type
 
   user_data = templatefile("${path.module}/templates/user-data.yaml", {
-    gridgain_license  = base64gzip(var.gridgain_license),
-    gridgain_config   = base64gzip(var.gridgain_config),
+    gridgain_license = base64gzip(var.gridgain_license),
+    gridgain_config  = base64gzip(var.gridgain_config),
+    public_ips       = local.public_ips
+    private_ips      = local.private_ips
+    node_id          = count.index
+
+    ssl_enable        = var.ssl_enable
     gridgain_ssl_cert = base64gzip(var.gridgain_ssl_cert),
     gridgain_ssl_key  = base64gzip(var.gridgain_ssl_key),
     keystore_password = var.keystore_password
-    public_ip         = var.public_access_enable ? tostring(aws_eip.eip[count.index].public_ip) : ""
-    public_ips        = local.public_ips
-    private_ips       = local.private_ips
-    node_id           = tostring(count.index)
+
+    cloudwatch_logs_enable   = var.cloudwatch_logs_enable
+    cloudwatch_loggroup_name = var.cloudwatch_loggroup_name
   })
   user_data_replace_on_change = true
   availability_zone           = var.zones[count.index % local.az_count]
