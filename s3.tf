@@ -1,7 +1,7 @@
 locals {
   # Create s3 bucket if it was not provided
-  create_s3_bucket = var.s3_bucket == ""
-  s3_bucket        = local.create_s3_bucket ? module.s3_bucket.s3_bucket_id : var.s3_bucket
+  create_s3_bucket = var.s3_enable ? var.s3_bucket == "" : false
+  s3_bucket        = var.s3_bucket != "" ? var.s3_bucket : module.s3_bucket.s3_bucket_id
 }
 
 module "s3_bucket" {

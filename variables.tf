@@ -46,6 +46,12 @@ variable "ports" {
   default     = ["22", "8080", "10800", "10900", "11211", "47100", "47500", "49112"]
 }
 
+variable "s3_enable" {
+  description = "Whether to enable S3 bucket for snapshots"
+  type        = bool
+  default     = false
+}
+
 variable "s3_bucket" {
   description = "Name of s3 bucket to use. If empty, module will create a new one"
   type        = string

@@ -34,8 +34,8 @@ write_files:
       -Djavax.net.ssl.keyStorePassword=${keystore_password} \
 %{~ endif ~}
 %{ if can(public_ips[node_id]) ~}
-      -Djava.rmi.server.hostname=${public_ips[node_id]} \
-%{~ endif ~}s
+      -Djava.rmi.server.hostname=${public_ips[node_id]}
+%{~ endif ~}
 
 runcmd:
 %{ if ssl_enable ~}
@@ -46,6 +46,4 @@ runcmd:
   - chmod 0640 /opt/gridgain/config/* /opt/gridgain/ssl/*
   - rm -f /opt/gridgain/ssl/server.crt /opt/gridgain/ssl/server.key
   - systemctl restart gridgain
-%{ if node_id == 0 ~}
-  - while true; do /opt/gridgain/binaries/latest/bin/control.sh --state && break; done; /opt/gridgain/binaries/latest/bin/control.sh --yes --set-state ACTIVE
-%{ endif ~}
+  - systemctl enable gridgain
