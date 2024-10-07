@@ -20,12 +20,12 @@ output "public_domains" {
 
 output "private_ips" {
   description = "List of private IPs of GridGain nodes"
-  value       = aws_instance.this.*.private_ip
+  value       = local.private_ips
 }
 
 output "public_ips" {
   description = "List of public IPs of GridGain nodes"
-  value       = aws_instance.this.*.public_ip
+  value       = local.public_ips
 }
 
 output "s3_bucket" {

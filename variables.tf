@@ -46,6 +46,12 @@ variable "ports" {
   default     = ["22", "8080", "10800", "10900", "11211", "47100", "47500", "49112"]
 }
 
+variable "s3_enable" {
+  description = "Whether to enable S3 bucket for snapshots"
+  type        = bool
+  default     = false
+}
+
 variable "s3_bucket" {
   description = "Name of s3 bucket to use. If empty, module will create a new one"
   type        = string
@@ -61,7 +67,7 @@ variable "kms_key_alias" {
 variable "instance_type" {
   description = "Instance type to be used for GridGain nodes"
   type        = string
-  default     = "t3.micro"
+  default     = "t3.medium"
 }
 
 variable "root_volume_size" {
@@ -124,6 +130,18 @@ variable "ssm_enable" {
   default     = true
 }
 
+variable "cloudwatch_logs_enable" {
+  description = "Enable sending logs to Cloudwatch Logs"
+  type        = bool
+  default     = false
+}
+
+variable "cloudwatch_loggroup_name" {
+  description = "Name of Cloudwatch Log Group to send logs to"
+  type        = string
+  default     = "/aws/gridgain"
+}
+
 variable "fullname" {
   description = "Full name to be used in description of all resources"
   type        = string
@@ -140,4 +158,38 @@ variable "tags" {
   description = "A map of additional tags to assign to resources"
   type        = map(string)
   default     = {}
+}
+
+variable "gridgain_license" {
+  description = "GridGain license xml"
+  type        = string
+}
+
+variable "gridgain_config" {
+  description = "GridGain config xml"
+  type        = string
+}
+
+variable "ssl_enable" {
+  description = "Whether SSL should be enabled"
+  type        = bool
+  default     = false
+}
+
+variable "gridgain_ssl_cert" {
+  description = "GridGain SSL certificate"
+  type        = string
+  default     = ""
+}
+
+variable "gridgain_ssl_key" {
+  description = "GridGain SSL key"
+  type        = string
+  default     = ""
+}
+
+variable "keystore_password" {
+  description = "SSL Keystore password"
+  type        = string
+  default     = ""
 }

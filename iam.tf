@@ -23,20 +23,23 @@ resource "aws_iam_role" "this" {
 }
 
 data "aws_iam_policy_document" "this" {
-  statement {
-    actions = [
-      "s3:ListBucket",
-      "s3:PutObject",
-      "s3:PutObjectAcl",
-      "s3:GetObject",
-      "s3:GetObjectAcl",
-      "s3:DeleteObject",
-    ]
+  dynamic "statement" {
+    for_each = var.s3_enable ? [1] : []
+    content {
+      actions = [
+        "s3:ListBucket",
+        "s3:PutObject",
+        "s3:PutObjectAcl",
+        "s3:GetObject",
+        "s3:GetObjectAcl",
+        "s3:DeleteObject",
+      ]
 
-    resources = [
-      "arn:aws:s3:::${local.s3_bucket}",
-      "arn:aws:s3:::${local.s3_bucket}/*",
-    ]
+      resources = [
+        "arn:aws:s3:::${local.s3_bucket}",
+        "arn:aws:s3:::${local.s3_bucket}/*",
+      ]
+    }
   }
 
   statement {
@@ -50,6 +53,29 @@ data "aws_iam_policy_document" "this" {
     resources = [
       local.kms_key_arn,
     ]
+  }
+
+  statement {
+    actions = [
+      "elasticloadbalancing:DescribeLoadBalancerAttributes",
+      "elasticloadbalancing:DescribeLoadBalancers",
+      "elasticloadbalancing:DescribeTags",
+      "elasticloadbalancing:DescribeLoadBalancerPolicies",
+      "elasticloadbalancing:DescribeLoadBalancerPolicyTypes",
+      "elasticloadbalancing:DescribeInstanceHealth",
+      "elasticloadbalancing:DescribeAccountLimits",
+      "elasticloadbalancing:DescribeListenerAttributes",
+      "elasticloadbalancing:DescribeListenerCertificates",
+      "elasticloadbalancing:DescribeListeners",
+      "elasticloadbalancing:DescribeTargetGroupAttributes",
+      "elasticloadbalancing:DescribeTargetGroups",
+      "elasticloadbalancing:DescribeTargetHealth",
+      "elasticloadbalancing:DescribeTrustStoreAssociations",
+      "elasticloadbalancing:DescribeTrustStoreRevocations",
+      "elasticloadbalancing:DescribeTrustStores",
+      "elasticloadbalancing:GetResourcePolicy"
+    ]
+    resources = [aws_lb.this.arn]
   }
 }
 
@@ -73,6 +99,12 @@ resource "aws_iam_role_policy_attachment" "ssm" {
   count      = var.ssm_enable ? 1 : 0
   role       = aws_iam_role.this.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "cloudwatch_logs" {
+  count      = var.cloudwatch_logs_enable ? 1 : 0
+  role       = aws_iam_role.this.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 }
 
 resource "aws_iam_instance_profile" "this" {

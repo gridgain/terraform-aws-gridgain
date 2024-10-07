@@ -1,0 +1,49 @@
+#cloud-config
+# vim: syntax=yaml
+
+%{~ if cloudwatch_logs_enable ~}
+bootcmd:
+  - sed 's#CLOUDWATCH_LOGGROUP_NAME#${cloudwatch_loggroup_name}#g' /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+  - systemctl enable --now amazon-cloudwatch-agent
+%{~ endif ~}
+
+write_files:
+  - path: /opt/gridgain/config/license.xml
+    encoding: gzip
+    content: !!binary |
+      ${gridgain_license}
+  - path: /opt/gridgain/config/server.xml
+    encoding: gzip
+    content: !!binary |
+      ${gridgain_config}
+%{ if ssl_enable ~}
+  - path: /opt/gridgain/ssl/server.crt
+    encoding: gzip
+    content: !!binary |
+      ${gridgain_ssl_cert}
+  - path: /opt/gridgain/ssl/server.key
+    encoding: gzip
+    content: !!binary |
+      ${gridgain_ssl_key}
+%{ endif ~}
+  - path: /opt/gridgain/config/service.properties.override
+    content: |
+      EXTRA_OPTS=\
+%{ if ssl_enable ~}
+      -Djavax.net.ssl.keyStore=/opt/gridgain/ssl/server.jks \
+      -Djavax.net.ssl.keyStorePassword=${keystore_password} \
+%{~ endif ~}
+%{ if can(public_ips[node_id]) ~}
+      -Djava.rmi.server.hostname=${public_ips[node_id]}
+%{~ endif ~}
+
+runcmd:
+%{ if ssl_enable ~}
+  - openssl pkcs12 -export -in /opt/gridgain/ssl/server.crt -inkey /opt/gridgain/ssl/server.key -name root -out /opt/gridgain/ssl/server.p12 -password pass:${keystore_password}
+  - ln -s /opt/gridgain/ssl/server.p12 /opt/gridgain/ssl/server.jks
+%{ endif ~}
+  - chown -h gg_rw_user:gg_rw_group /opt/gridgain/config/* /opt/gridgain/ssl/*
+  - chmod 0640 /opt/gridgain/config/* /opt/gridgain/ssl/*
+  - rm -f /opt/gridgain/ssl/server.crt /opt/gridgain/ssl/server.key
+  - systemctl restart gridgain
+  - systemctl enable gridgain
