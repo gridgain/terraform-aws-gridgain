@@ -1,0 +1,337 @@
+#cloud-config
+# vim: syntax=yaml
+
+%{~ if cloudwatch_logs_enable ~}
+bootcmd:
+  - sed 's#CLOUDWATCH_LOGGROUP_NAME#${cloudwatch_loggroup_name}#g' /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+  - systemctl enable --now amazon-cloudwatch-agent
+%{~ endif ~}
+
+write_files:
+%{ if ssl_enable ~}
+  - path: /etc/gridgain9db/ssl/server.crt
+    encoding: gzip
+    content: !!binary |
+      ${gridgain_ssl_cert}
+  - path: /etc/gridgain9db/ssl/server.key
+    encoding: gzip
+    content: !!binary |
+      ${gridgain_ssl_key}
+%{ endif ~}
+  - path: /etc/gridgain9db/input.json
+    encoding: gzip
+    content: !!binary |
+      ${gridgain_config}
+  - path: /etc/gridgain9db/vars.env
+    owner: 'gridgain:gridgain'
+    content: |
+      NODE_NAME=${node_name}
+      WORK_DIR=/var/lib/gridgain9db
+      CONFIG_FILE=/etc/gridgain9db/gridgain-config.conf
+
+      #JVM props
+      JVM_MAX_MEM="16384m"
+      JVM_MIN_MEM="16384m"
+      JVM_GC="G1GC"
+      JVM_G1HeapRegionSize="32M"
+      JVM_GC_LOG_NAME="gc.log.$(date -u +%Y%m%d_%H%M%S)"
+      JVM_GC_LOG_SIZE="100m"
+      JVM_GC_NUM_LOGS="10"
+      ##For any additional users settings
+      GRIDGAIN9_EXTRA_JVM_ARGS=
+  - path: /etc/gridgain9db/gridgain-license.conf
+    encoding: gzip
+    content: !!binary |
+      ${gridgain_license}
+  - path: /etc/gridgain9db/auth.json.j2
+    owner: 'gridgain:gridgain'
+    content: |
+        {
+            "ignite" : {
+                "security" : {
+                    "authentication" : {
+                        "providers" : [ {
+                            "name" : "default",
+                            "type" : "basic",
+                            "users" : [ 
+                                {
+                                    "password" : "{{ server_password }}",
+                                    "roles" : [ "system" ],
+                                    "username" : "{{ server_login }}",
+                                    "displayName" : "{{ server_login }}"
+                                }, 
+                                {
+                                    "password" : "{{ user_password }}",
+                                    "roles" : [ "user" ],
+                                    "username" : "{{ user_login }}",
+                                    "displayName" : "{{ user_login }}"
+                                },
+                                {
+                                    "password" : "{{ cc_password }}",
+                                    "roles" : [ "user" ],
+                                    "username" : "{{ cc_login }}",
+                                    "displayName" : "{{ cc_login }}"
+                                }
+                            ]
+                        } ]
+                    },
+                    "authorization" : {
+                        "roles" : [ {
+                            "name" : "user",
+                            "privileges" : [ 
+                                {
+                                    "action": "EXEC_JOB",
+                                    "name": "EXEC_JOB_on_cluster",
+                                    "on": ""
+                                },
+                                {
+                                    "action": "GET_JOB_STATES",
+                                    "name": "GET_JOB_STATES_on_cluster",
+                                    "on": ""
+                                }
+                            ],
+                            "displayName" : "system"
+                        }]
+                    },
+                    "enabled" : true,
+                    "jwt" : {
+                        "keyTtl" : 1209600000,
+                        "ttl" : 28800000
+                    }
+                }
+            }
+        }
+  - path: /etc/gridgain9db/gridgain-config.conf
+    content: |
+        ignite {
+            clientConnector {
+                connectTimeout=5000
+                idleTimeout=0
+                listenAddress=""
+                metricsEnabled=true
+                port=10800
+                sendServerExceptionStackTraceToClient=false
+                ssl {
+                    ciphers=""
+                    clientAuth=none
+                    enabled=false
+                    keyStore {
+                        password=""
+                        path=""
+                        type=PKCS12
+                    }
+                    trustStore {
+                        password=""
+                        path=""
+                        type=PKCS12
+                    }
+                }
+            }
+            compute {
+                queueMaxSize=2147483647
+                statesLifetimeMillis=60000
+                threadPoolSize=10
+                threadPoolStopTimeoutMillis=10000
+            }
+            criticalWorkers {
+                livenessCheckInterval=200
+                maxAllowedLag=500
+                nettyThreadsHeartbeatInterval=100
+            }
+            deployment {
+                deploymentLocation=deployment
+            }
+            eviction {
+                checkInterval=60000
+            }
+            expiration {
+                batchSize=1000
+                checkInterval=600000
+                parallelismLevel=1
+            }
+            failureHandler {
+                handler {
+                    ignoredFailureTypes=[
+                        systemWorkerBlocked,
+                        systemCriticalOperationTimeout
+                    ]
+                    type=noop
+                }
+            }
+            network {
+                fileTransfer {
+                    chunkSize=1048576
+                    maxConcurrentRequests=4
+                    responseTimeout=10000
+                    threadPoolSize=8
+                }
+                inbound {
+                    soBacklog=128
+                    soKeepAlive=true
+                    soLinger=0
+                    soReuseAddr=true
+                    tcpNoDelay=true
+                }
+                listenAddress=""
+                membership {
+                    failurePingInterval=1000
+                    membershipSyncInterval=30000
+                    scaleCube {
+                        failurePingRequestMembers=3
+                        gossipInterval=200
+                        gossipRepeatMult=3
+                        membershipSuspicionMultiplier=5
+                        metadataTimeout=3000
+                    }
+                }
+                nodeFinder {
+                    netClusterNodes=[
+%{ for private_ip in private_ips ~}
+                        "${private_ip}:3344"
+%{ endfor ~}
+                    ]
+                    type=STATIC
+                }
+                outbound {
+                    soKeepAlive=true
+                    soLinger=0
+                    tcpNoDelay=true
+                }
+                port=3344
+                shutdownQuietPeriod=0
+                shutdownTimeout=15000
+                ssl {
+                    ciphers=""
+                    clientAuth=none
+                    enabled=false
+                    keyStore {
+                        password=""
+                        path=""
+                        type=PKCS12
+                    }
+                    trustStore {
+                        password=""
+                        path=""
+                        type=PKCS12
+                    }
+                }
+            }
+            raft {
+                fsync=true
+                installSnapshotTimeout=300000
+                logStripesCount=4
+                logYieldStrategy=false
+                responseTimeout=3000
+                retryDelay=200
+                retryTimeout=10000
+                stripes=10
+                volatileRaft {
+                    logStorageBudget {
+                        name=unlimited
+                    }
+                }
+            }
+            rest {
+                dualProtocol=false
+                httpToHttpsRedirection=false
+                port=10300
+                ssl {
+                    ciphers=""
+                    clientAuth=none
+                    enabled=false
+                    keyStore {
+                        password=""
+                        path=""
+                        type=PKCS12
+                    }
+                    port=10400
+                    trustStore {
+                        password=""
+                        path=""
+                        type=PKCS12
+                    }
+                }
+            }
+            sql {
+                execution {
+                    threadCount=4
+                }
+                nodeMemoryQuota="60%"
+                offloadingDataDir="sql_offloading"
+                offloadingDataLimit="0g"
+                planner {
+                    threadCount=4
+                }
+            }
+            storage {
+                engines {
+                    aimem {
+                        pageSize=16384
+                    }
+                    aipersist {
+                        checkpoint {
+                            checkpointDelayMillis=200
+                            checkpointThreads=4
+                            compactionThreads=4
+                            interval=180000
+                            intervalDeviation=40
+                            logReadLockThresholdTimeout=0
+                            readLockTimeout=10000
+                            useAsyncFileIoFactory=true
+                        }
+                        pageSize=16384
+                    }
+                    rocksdb {
+                        flushDelayMillis=100
+                    }
+                }
+                profiles=[
+                    {
+                        engine=aipersist
+                        name=default
+                        replacementMode=CLOCK
+                        size=3221225472
+                    }
+                ]
+            }
+            system {
+                cmgPath=""
+                metastoragePath=""
+                partitionsBasePath=""
+                partitionsLogPath=""
+            }
+        }
+  - path: /etc/gridgain9db/template.sh
+    content: |
+        #!/bin/bash
+
+        export ggmc_cfg="/etc/gridgain9db/input.json"
+
+        cc_login="$(cat "$ggmc_cfg" | jq -r '.ggmc.access.users[] | select(.meta == "rover").login' | base64 -d -)"
+        cc_password="$(cat "$ggmc_cfg" | jq -r '.ggmc.access.users[] | select(.meta == "rover").password' | base64 -d -)"
+        export cc_login cc_password
+
+        server_login="$(cat "$ggmc_cfg" | jq -r '.ggmc.access.users[] | select(.meta == "server").login' | base64 -d -)"
+        server_password="$(cat "$ggmc_cfg" | jq -r '.ggmc.access.users[] | select(.meta == "server").password' | base64 -d -)"
+        export server_login server_password
+
+        user_email="$(cat "$ggmc_cfg" | jq -r '.ggmc.access.users[] | select(.meta == "api").email' | base64 -d -)"
+        user_login="$(cat "$ggmc_cfg" | jq -r '.ggmc.access.users[] | select(.meta == "api").login' | base64 -d -)" # base64 encoded
+        user_password="$(cat "$ggmc_cfg" | jq -r '.ggmc.access.users[] | select(.meta == "api").password' | base64 -d -)" # base64 encoded
+        export user_email user_login user_password
+
+        j2 "/etc/gridgain9db/auth.json.j2" > "/etc/gridgain9db/auth.json"
+
+
+runcmd:
+%{ if ssl_enable ~}
+  - openssl pkcs12 -export -in /etc/gridgain9db/ssl/server.crt -inkey /etc/gridgain9db/ssl/server.key -name root -out /etc/gridgain9db/ssl/server.p12 -password pass:${keystore_password}
+  - ln -s /etc/gridgain9db/ssl/server.p12 /etc/gridgain9db/ssl/server.jks
+%{ endif ~}
+# Move to AMI
+  - yum -y install python3 python3-pip
+  - pip install j2cli j2cli[yaml]
+  - bash /etc/gridgain9db/template.sh
+  - systemctl restart gridgain9db
+  - systemctl enable gridgain9db
+  - sleep 60 && gridgain9 cluster init --name=${name} --metastorage-group ${nodes_list} --url=http://${private_ips[0]}:10300 --config-files=/etc/gridgain9db/gridgain-license.conf --config-files=/etc/gridgain9db/auth.json

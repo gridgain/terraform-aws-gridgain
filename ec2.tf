@@ -7,11 +7,18 @@ locals {
 
   public_ips  = var.public_access_enable ? flatten(aws_eip.eip.*.public_ip) : []
   private_ips = flatten(aws_network_interface.eni.*.private_ips)
+  nodes_list  = join(",", [for i in range(var.nodes_count) : "${var.name}-${i}"])
   ip_zip = [for i in range(var.nodes_count) : {
     public_ip  = var.public_access_enable ? aws_eip.eip[i].public_ip : tostring(i),
     private_ip = element(tolist(aws_network_interface.eni[i].private_ips), 0)
   }]
   ip_map = { for item in local.ip_zip : item.public_ip => item.private_ip }
+
+  gridgain_major_version = regex("^([0-9]+)\\.", var.gridgain_version)[0]
+  user_data_file = (
+    tonumber(local.gridgain_major_version) == 9 ? "user-data-gg9.yaml" : (
+    tonumber(local.gridgain_major_version) == 8 ? "user-data.yaml" : "user-data.yaml")
+  )
 }
 
 data "aws_region" "this" {}
@@ -105,9 +112,12 @@ resource "aws_instance" "this" {
   ami           = local.ami_id
   instance_type = var.instance_type
 
-  user_data = templatefile("${path.module}/templates/user-data.yaml", {
-    gridgain_license = base64gzip(var.gridgain_license),
-    gridgain_config  = base64gzip(var.gridgain_config),
+  user_data = templatefile("${path.module}/templates/${local.user_data_file}", {
+    name                   = "${var.name}"
+    node_name              = "${var.name}-${count.index}"
+    nodes_list             = local.nodes_list
+    gridgain_license = base64gzip(var.gridgain_license)
+    gridgain_config  = base64gzip(var.gridgain_config)
     public_ips       = local.public_ips
     private_ips      = local.private_ips
     node_id          = count.index
@@ -116,6 +126,15 @@ resource "aws_instance" "this" {
     gridgain_ssl_cert = base64gzip(var.gridgain_ssl_cert),
     gridgain_ssl_key  = base64gzip(var.gridgain_ssl_key),
     keystore_password = var.keystore_password
+
+    # server_login      = var.server_login
+    # server_password   = var.server_password
+
+    # user_login        = var.user_login
+    # user_password     = var.user_password
+
+    # cc_login        = var.cc_login
+    # cc_password     = var.cc_password
 
     cloudwatch_logs_enable   = var.cloudwatch_logs_enable
     cloudwatch_loggroup_name = var.cloudwatch_loggroup_name

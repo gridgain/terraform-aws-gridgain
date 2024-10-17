@@ -112,11 +112,11 @@ variable "ami_id" {
   # default     = ""
 }
 
-# variable "gridgain_version" {
-#   description = "GridGain version to use when searching for AMI"
-#   type        = string
-#   default     = "8.9.9"
-# }
+variable "gridgain_version" {
+  description = "GridGain version to use when searching for AMI"
+  type        = string
+  default     = "8.9.9"
+}
 
 variable "ssh_public_key" {
   description = "SSH public key used to connect to instances. If empty, none will be provisioned"
@@ -193,3 +193,39 @@ variable "keystore_password" {
   type        = string
   default     = ""
 }
+
+# variable "server_login" {
+#   description = "server_login"
+#   type        = string
+#   default     = "server"
+# }
+
+# variable "server_password" {
+#   description = "server_password"
+#   type        = string
+#   default     = "default_password"
+# }
+
+# variable "user_login" {
+#   description = "user_login"
+#   type        = string
+#   default     = "ignite"
+# }
+
+# variable "user_password" {
+#   description = "user_password"
+#   type        = string
+#   default     = "ignite"
+# }
+
+# variable "cc_login" {
+#   description = "cc_login"
+#   type        = string
+#   default     = "cc_login"
+# }
+
+# variable "cc_password" {
+#   description = "cc_password"
+#   type        = string
+#   default     = "cc_password"
+# }
