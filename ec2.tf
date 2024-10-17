@@ -19,6 +19,11 @@ locals {
     tonumber(local.gridgain_major_version) == 9 ? "user-data-gg9.yaml" : (
     tonumber(local.gridgain_major_version) == 8 ? "user-data.yaml" : "user-data.yaml")
   )
+
+  gg_config_script = (
+    tonumber(local.gridgain_major_version) == 9 ? file("${path.module}/scripts/config-gg9.sh") : (
+    tonumber(local.gridgain_major_version) == 8 ? file("${path.module}/scripts/config.sh") : file("${path.module}/scripts/config.sh"))
+  )
 }
 
 data "aws_region" "this" {}
@@ -116,8 +121,11 @@ resource "aws_instance" "this" {
     name                   = "${var.name}"
     node_name              = "${var.name}-${count.index}"
     nodes_list             = local.nodes_list
+
     gridgain_license = base64gzip(var.gridgain_license)
     gridgain_config  = base64gzip(var.gridgain_config)
+    gg_config_script = base64gzip(local.gg_config_script)
+
     public_ips       = local.public_ips
     private_ips      = local.private_ips
     node_id          = count.index
@@ -126,15 +134,6 @@ resource "aws_instance" "this" {
     gridgain_ssl_cert = base64gzip(var.gridgain_ssl_cert),
     gridgain_ssl_key  = base64gzip(var.gridgain_ssl_key),
     keystore_password = var.keystore_password
-
-    # server_login      = var.server_login
-    # server_password   = var.server_password
-
-    # user_login        = var.user_login
-    # user_password     = var.user_password
-
-    # cc_login        = var.cc_login
-    # cc_password     = var.cc_password
 
     cloudwatch_logs_enable   = var.cloudwatch_logs_enable
     cloudwatch_loggroup_name = var.cloudwatch_loggroup_name

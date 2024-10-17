@@ -193,39 +193,3 @@ variable "keystore_password" {
   type        = string
   default     = ""
 }
-
-# variable "server_login" {
-#   description = "server_login"
-#   type        = string
-#   default     = "server"
-# }
-
-# variable "server_password" {
-#   description = "server_password"
-#   type        = string
-#   default     = "default_password"
-# }
-
-# variable "user_login" {
-#   description = "user_login"
-#   type        = string
-#   default     = "ignite"
-# }
-
-# variable "user_password" {
-#   description = "user_password"
-#   type        = string
-#   default     = "ignite"
-# }
-
-# variable "cc_login" {
-#   description = "cc_login"
-#   type        = string
-#   default     = "cc_login"
-# }
-
-# variable "cc_password" {
-#   description = "cc_password"
-#   type        = string
-#   default     = "cc_password"
-# }
