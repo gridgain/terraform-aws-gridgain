@@ -117,7 +117,7 @@ resource "aws_instance" "this" {
   ami           = local.ami_id
   instance_type = var.instance_type
 
-  user_data = templatefile("${path.module}/templates/${local.user_data_file}", {
+  user_data = base64gzip(templatefile("${path.module}/templates/${local.user_data_file}", {
     name                   = "${var.name}"
     node_name              = "${var.name}-${count.index}"
     nodes_list             = local.nodes_list
@@ -131,13 +131,13 @@ resource "aws_instance" "this" {
     node_id          = count.index
 
     ssl_enable        = var.ssl_enable
-    gridgain_ssl_cert = base64gzip(var.gridgain_ssl_cert),
-    gridgain_ssl_key  = base64gzip(var.gridgain_ssl_key),
+    gridgain_ssl_cert = base64gzip(base64decode(var.gridgain_ssl_cert)),
+    gridgain_ssl_key  = base64gzip(base64decode(var.gridgain_ssl_key)),
     keystore_password = var.keystore_password
 
     cloudwatch_logs_enable   = var.cloudwatch_logs_enable
     cloudwatch_loggroup_name = var.cloudwatch_loggroup_name
-  })
+  }))
   user_data_replace_on_change = true
   availability_zone           = var.zones[count.index % local.az_count]
 

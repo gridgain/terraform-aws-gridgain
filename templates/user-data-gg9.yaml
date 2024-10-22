@@ -101,7 +101,7 @@ write_files:
                 }
             }
         }
-  - path: /etc/gridgain9db/gridgain-config.conf
+  - path: /etc/gridgain9db/gridgain-config.conf.j2
     content: |
         ignite {
             clientConnector {
@@ -114,15 +114,10 @@ write_files:
                 ssl {
                     ciphers=""
                     clientAuth=none
-                    enabled=false
+                    enabled=${ssl_enable}
                     keyStore {
-                        password=""
-                        path=""
-                        type=PKCS12
-                    }
-                    trustStore {
-                        password=""
-                        path=""
+                        password="${keystore_password}"
+                        path="/etc/gridgain9db/ssl/server.jks"
                         type=PKCS12
                     }
                 }
@@ -203,15 +198,15 @@ write_files:
                 ssl {
                     ciphers=""
                     clientAuth=none
-                    enabled=false
+                    enabled=${ssl_enable}
                     keyStore {
-                        password=""
-                        path=""
+                        password="${keystore_password}"
+                        path="/etc/gridgain9db/ssl/server.jks"
                         type=PKCS12
                     }
                     trustStore {
-                        password=""
-                        path=""
+                        password="${keystore_password}"
+                        path="/etc/gridgain9db/ssl/server.jks"
                         type=PKCS12
                     }
                 }
@@ -238,18 +233,18 @@ write_files:
                 ssl {
                     ciphers=""
                     clientAuth=none
-                    enabled=false
+                    enabled=${ssl_enable}
                     keyStore {
-                        password=""
-                        path=""
+                        password="${keystore_password}"
+                        path="/etc/gridgain9db/ssl/server.jks"
+                        type=PKCS12
+                    }
+                    trustStore {
+                        password="${keystore_password}"
+                        path="/etc/gridgain9db/ssl/server.jks"
                         type=PKCS12
                     }
                     port=10400
-                    trustStore {
-                        password=""
-                        path=""
-                        type=PKCS12
-                    }
                 }
             }
             sql {
@@ -286,12 +281,41 @@ write_files:
                     }
                 }
                 profiles=[
+                    {%- if data.default[0].persist %}
                     {
                         engine=aipersist
                         name=default
                         replacementMode=CLOCK
-                        size=3221225472
+                        size={{ data.default[0].size }}
                     }
+                    {%- else %}
+                    {
+                        engine=aimem
+                        name=default
+                        emptyPagesPoolSize=100
+                        initSize={{ data.default[0].size }}
+                        maxSize={{ data.default[0].size }}
+                    }
+                    {%- endif %}
+                    {%- for cdr in data.custom %}
+                    {%- if cdr.persist %}    
+                    {
+                        engine=aipersist
+                        name={{ cdr.name }}
+                        replacementMode=CLOCK
+                        size={{ cdr.size }}
+                    },
+                    {%- else %}
+                    {
+                        engine=aimem
+                        name={{ cdr.name }}
+                        emptyPagesPoolSize=100
+                        initSize={{ cdr.size }}
+                        maxSize={{ cdr.size }}
+                    },
+                    {%- endif %}
+                    {%- endfor %}
+
                 ]
             }
             system {
@@ -310,11 +334,14 @@ runcmd:
 %{ if ssl_enable ~}
   - openssl pkcs12 -export -in /etc/gridgain9db/ssl/server.crt -inkey /etc/gridgain9db/ssl/server.key -name root -out /etc/gridgain9db/ssl/server.p12 -password pass:${keystore_password}
   - ln -s /etc/gridgain9db/ssl/server.p12 /etc/gridgain9db/ssl/server.jks
+  - chown -h gridgain:gridgain /etc/gridgain9db/ssl/server.jks /etc/gridgain9db/ssl/server.p12
+  - chmod 0640 /etc/gridgain9db/ssl/server.jks /etc/gridgain9db/ssl/server.p12
 %{ endif ~}
 # Move to AMI
   - yum -y install python3 python3-pip
   - pip install j2cli j2cli[yaml]
   - bash /etc/gridgain9db/template.sh
+  - chown -h gridgain:gridgain /etc/gridgain9db/gridgain-config.conf
   - systemctl restart gridgain9db
   - systemctl enable gridgain9db
   - sleep 60 && gridgain9 cluster init --name=${name} --metastorage-group ${nodes_list} --url=http://${private_ips[0]}:10300 --config-files=/etc/gridgain9db/gridgain-license.conf --config-files=/etc/gridgain9db/auth.json

@@ -16,3 +16,6 @@ user_password="$(cat "$ggmc_cfg" | jq -r '.ggmc.access.users[] | select(.meta ==
 export user_email user_login user_password
 
 j2 "/etc/gridgain9db/auth.json.j2" > "/etc/gridgain9db/auth.json"
+
+# template gridgain main config
+cat "$ggmc_cfg" | jq '.ggmc.config' | j2 -f json /etc/gridgain9db/gridgain-config.conf.j2 > "/etc/gridgain9db/gridgain-config.conf"
