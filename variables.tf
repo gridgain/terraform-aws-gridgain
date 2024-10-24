@@ -112,11 +112,11 @@ variable "ami_id" {
   # default     = ""
 }
 
-# variable "gridgain_version" {
-#   description = "GridGain version to use when searching for AMI"
-#   type        = string
-#   default     = "8.9.9"
-# }
+variable "gridgain_version" {
+  description = "GridGain version to use when searching for AMI"
+  type        = string
+  default     = "8.9.9"
+}
 
 variable "ssh_public_key" {
   description = "SSH public key used to connect to instances. If empty, none will be provisioned"
@@ -190,6 +190,12 @@ variable "gridgain_ssl_key" {
 
 variable "keystore_password" {
   description = "SSL Keystore password"
+  type        = string
+  default     = ""
+}
+
+variable "cluster_url" {
+  description = "Cluster url"
   type        = string
   default     = ""
 }

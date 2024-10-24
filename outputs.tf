@@ -37,3 +37,8 @@ output "kms_key_alias" {
   description = "KMS key alias used for snapshot encryption"
   value       = ""
 }
+
+output "nodes_list" {
+  description = "nodes_list"
+  value       = local.nodes_list
+}
