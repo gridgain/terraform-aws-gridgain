@@ -193,3 +193,9 @@ variable "keystore_password" {
   type        = string
   default     = ""
 }
+
+variable "cluster_url" {
+  description = "Cluster url"
+  type        = string
+  default     = ""
+}

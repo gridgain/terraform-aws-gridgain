@@ -239,11 +239,6 @@ write_files:
                         path="/etc/gridgain9db/ssl/server.jks"
                         type=PKCS12
                     }
-                    trustStore {
-                        password="${keystore_password}"
-                        path="/etc/gridgain9db/ssl/server.jks"
-                        type=PKCS12
-                    }
                     port=10400
                 }
             }
@@ -344,4 +339,6 @@ runcmd:
   - chown -h gridgain:gridgain /etc/gridgain9db/gridgain-config.conf
   - systemctl restart gridgain9db
   - systemctl enable gridgain9db
-  - sleep 60 && gridgain9 cluster init --name=${name} --metastorage-group ${nodes_list} --url=http://${private_ips[0]}:10300 --config-files=/etc/gridgain9db/gridgain-license.conf --config-files=/etc/gridgain9db/auth.json
+  - sleep 120
+  - gridgain9 cli config set ignite.cluster-endpoint-url=https://${cluster_url}:10400
+  - gridgain9 cluster init --name=${name} --metastorage-group ${nodes_list} --url=https://${cluster_url}:10400 --config-files=/etc/gridgain9db/gridgain-license.conf

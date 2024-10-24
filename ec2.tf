@@ -134,6 +134,7 @@ resource "aws_instance" "this" {
     gridgain_ssl_cert = base64gzip(base64decode(var.gridgain_ssl_cert)),
     gridgain_ssl_key  = base64gzip(base64decode(var.gridgain_ssl_key)),
     keystore_password = var.keystore_password
+    cluster_url       = var.cluster_url
 
     cloudwatch_logs_enable   = var.cloudwatch_logs_enable
     cloudwatch_loggroup_name = var.cloudwatch_loggroup_name
