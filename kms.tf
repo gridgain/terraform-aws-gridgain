@@ -12,8 +12,9 @@ data "aws_kms_key" "kms" {
 }
 
 module "kms" {
-  create = local.create_kms_key
-  source = "terraform-aws-modules/kms/aws"
+  create  = local.create_kms_key
+  source  = "terraform-aws-modules/kms/aws"
+  version = "3.1.0"
 
   aliases = [
     "${var.name}-kms"
