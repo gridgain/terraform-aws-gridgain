@@ -7,6 +7,7 @@ locals {
 module "s3_bucket" {
   create_bucket = local.create_s3_bucket
   source        = "terraform-aws-modules/s3-bucket/aws"
+  version       = "4.1.2"
 
   bucket = "${var.name}-s3"
   tags = merge(local.tags, {

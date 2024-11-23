@@ -1,17 +1,13 @@
 #cloud-config
 # vim: syntax=yaml
 
-%{~ if cloudwatch_logs_enable ~}
-bootcmd:
-  - sed 's#CLOUDWATCH_LOGGROUP_NAME#${cloudwatch_loggroup_name}#g' /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
-  - systemctl enable --now amazon-cloudwatch-agent
-%{~ endif ~}
-
 write_files:
+%{ if gridgain_license ~}
   - path: /opt/gridgain/config/license.xml
     encoding: gzip
     content: !!binary |
       ${gridgain_license}
+%{ endif ~}
   - path: /opt/gridgain/config/server.xml
     encoding: gzip
     content: !!binary |
@@ -25,6 +21,10 @@ write_files:
     encoding: gzip
     content: !!binary |
       ${gridgain_ssl_key}
+  - path: /opt/gridgain/config/jetty.xml
+    encoding: gzip
+    content: !!binary |
+      ${gridgain_jetty_config}
 %{ endif ~}
   - path: /opt/gridgain/config/service.properties.override
     content: |
@@ -35,6 +35,9 @@ write_files:
 %{~ endif ~}
 %{ if can(public_ips[node_id]) ~}
       -Djava.rmi.server.hostname=${public_ips[node_id]}
+%{~ endif ~}
+%{ if gridgain_license ~}
+      CP=-cp /opt/gridgain/binaries/latest/libs/*:/opt/gridgain/binaries/latest/libs/gridgain-ultimate/*:/opt/gridgain/binaries/latest/libs/ignite-control-utility/*:/opt/gridgain/binaries/latest/libs/ignite-indexing/*:/opt/gridgain/binaries/latest/libs/ignite-opencensus/*:/opt/gridgain/binaries/latest/libs/ignite-spring/*:/opt/gridgain/binaries/latest/libs/licenses/*:/opt/gridgain/binaries/latest/libs/ignite-rest-http/*:/opt/gridgain/binaries/latest/libs/ignite-log4j2/*:/opt/gridgain/binaries/latest/libs/control-center-agent/*:/opt/gridgain/binaries/latest/libs/ignite-schedule/*:/opt/gridgain/binaries/latest/libs/ignite-aws/*
 %{~ endif ~}
 
 runcmd:

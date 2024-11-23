@@ -193,3 +193,9 @@ variable "keystore_password" {
   type        = string
   default     = ""
 }
+
+variable "gridgain_jetty_config" {
+  description = "GridGain Jetty config xml"
+  type        = string
+  default     = ""
+}

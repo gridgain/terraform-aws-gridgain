@@ -43,62 +43,6 @@ resource "aws_eip_association" "eipa" {
   network_interface_id = aws_network_interface.eni[count.index].id
 }
 
-resource "aws_lb" "this" {
-  name               = "${var.name}-lb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.this.id]
-  subnets            = local.subnets
-
-  enable_deletion_protection       = false
-  enable_cross_zone_load_balancing = true
-  enable_http2                     = true
-  idle_timeout                     = 60
-
-  tags = merge(local.tags, {
-    Name = "${var.name}-lb"
-  })
-}
-
-resource "aws_lb_listener" "this" {
-  load_balancer_arn = aws_lb.this.arn
-  port              = 80
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.this.arn
-  }
-}
-
-resource "aws_lb_target_group" "this" {
-  name     = "${var.name}-tg"
-  port     = 8080
-  protocol = "HTTP"
-  vpc_id   = local.vpc_id
-
-  health_check {
-    path                = "/ignite?cmd=version"
-    port                = 8080
-    protocol            = "HTTP"
-    timeout             = 5
-    interval            = 30
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-  }
-
-  tags = merge(local.tags, {
-    Name = "${var.name}-tg"
-  })
-}
-
-resource "aws_lb_target_group_attachment" "this" {
-  count            = var.nodes_count
-  target_group_arn = aws_lb_target_group.this.arn
-  target_id        = aws_instance.this[count.index].id
-  port             = 8080
-}
-
 resource "aws_instance" "this" {
   count = var.nodes_count
 
@@ -106,16 +50,17 @@ resource "aws_instance" "this" {
   instance_type = var.instance_type
 
   user_data = templatefile("${path.module}/templates/user-data.yaml", {
-    gridgain_license = base64gzip(var.gridgain_license),
-    gridgain_config  = base64gzip(var.gridgain_config),
+    gridgain_license = base64gzip(var.gridgain_license)
+    gridgain_config  = base64gzip(var.gridgain_config)
     public_ips       = local.public_ips
     private_ips      = local.private_ips
     node_id          = count.index
 
-    ssl_enable        = var.ssl_enable
-    gridgain_ssl_cert = base64gzip(var.gridgain_ssl_cert),
-    gridgain_ssl_key  = base64gzip(var.gridgain_ssl_key),
-    keystore_password = var.keystore_password
+    ssl_enable            = var.ssl_enable
+    gridgain_ssl_cert     = base64gzip(var.gridgain_ssl_cert)
+    gridgain_ssl_key      = base64gzip(var.gridgain_ssl_key)
+    keystore_password     = var.keystore_password
+    gridgain_jetty_config = base64gzip(var.gridgain_jetty_config)
 
     cloudwatch_logs_enable   = var.cloudwatch_logs_enable
     cloudwatch_loggroup_name = var.cloudwatch_loggroup_name
