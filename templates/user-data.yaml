@@ -1,3 +1,4 @@
+%{ if gridgain_config_defined ~}
 #cloud-config
 # vim: syntax=yaml
 
@@ -50,3 +51,4 @@ runcmd:
   - rm -f /opt/gridgain/ssl/server.crt /opt/gridgain/ssl/server.key
   - systemctl restart gridgain
   - systemctl enable gridgain
+%{ endif ~}

@@ -13,6 +13,7 @@ locals {
   }]
   ip_map                   = { for item in local.ip_zip : item.public_ip => item.private_ip }
   gridgain_license_defined = length(trimspace(var.gridgain_license)) > 0
+  gridgain_config_defined  = length(trimspace(var.gridgain_config)) > 0
 }
 
 data "aws_region" "this" {}
@@ -51,12 +52,14 @@ resource "aws_instance" "this" {
   instance_type = var.instance_type
 
   user_data = templatefile("${path.module}/templates/user-data.yaml", {
-    gridgain_license         = base64gzip(var.gridgain_license)
     gridgain_license_defined = local.gridgain_license_defined
-    gridgain_config          = base64gzip(var.gridgain_config)
-    public_ips               = local.public_ips
-    private_ips              = local.private_ips
-    node_id                  = count.index
+    gridgain_config_defined  = local.gridgain_config_defined
+
+    gridgain_license = base64gzip(var.gridgain_license)
+    gridgain_config  = base64gzip(var.gridgain_config)
+    public_ips       = local.public_ips
+    private_ips      = local.private_ips
+    node_id          = count.index
 
     ssl_enable            = var.ssl_enable
     gridgain_ssl_cert     = base64gzip(var.gridgain_ssl_cert)
