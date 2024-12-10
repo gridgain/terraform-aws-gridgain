@@ -73,13 +73,13 @@ variable "instance_type" {
 variable "root_volume_size" {
   description = "Size of root volume in GB for GridGain nodes"
   type        = number
-  default     = 50
+  default     = 128
 }
 
 variable "root_volume_type" {
   description = "Type of root volume for GridGain nodes"
   type        = string
-  default     = "gp2"
+  default     = "gp3"
 }
 
 variable "root_volume_throughput" {
