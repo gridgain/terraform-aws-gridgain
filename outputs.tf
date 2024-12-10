@@ -145,32 +145,32 @@ output "availability_zone" {
 
 output "iam_role_name" {
   description = "The name of the IAM role"
-  value       = try(aws_iam_role.this[0].name, null)
+  value       = try(aws_iam_role.this.name, null)
 }
 
 output "iam_role_arn" {
   description = "The Amazon Resource Name (ARN) specifying the IAM role"
-  value       = try(aws_iam_role.this[0].arn, null)
+  value       = try(aws_iam_role.this.arn, null)
 }
 
 output "iam_role_unique_id" {
   description = "Stable and unique string identifying the IAM role"
-  value       = try(aws_iam_role.this[0].unique_id, null)
+  value       = try(aws_iam_role.this.unique_id, null)
 }
 
 output "iam_instance_profile_arn" {
   description = "ARN assigned by AWS to the instance profile"
-  value       = try(aws_iam_instance_profile.this[0].arn, null)
+  value       = try(aws_iam_instance_profile.this.arn, null)
 }
 
 output "iam_instance_profile_id" {
   description = "Instance profile's ID"
-  value       = try(aws_iam_instance_profile.this[0].id, null)
+  value       = try(aws_iam_instance_profile.this.id, null)
 }
 
 output "iam_instance_profile_unique" {
   description = "Stable and unique string identifying the IAM instance profile"
-  value       = try(aws_iam_instance_profile.this[0].unique_id, null)
+  value       = try(aws_iam_instance_profile.this.unique_id, null)
 }
 
 output "ssm_connect_commands" {
