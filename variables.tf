@@ -17,13 +17,13 @@ variable "vpc_cidr" {
 }
 
 variable "subnet_cidrs" {
-  description = "List of 2 CIDRs for private subnets. Only 2 are supported"
+  description = "List of CIDRs for private subnets"
   type        = list(string)
   default     = ["10.0.0.0/19", "10.0.32.0/19"]
 }
 
 variable "zones" {
-  description = "List of 2 availability zones to create VPC in. Only 2 are supported"
+  description = "List of availability zones to create VPC in"
   type        = list(string)
   default     = ["us-east-1a", "us-east-1b"]
 }
@@ -163,11 +163,13 @@ variable "tags" {
 variable "gridgain_license" {
   description = "GridGain license xml"
   type        = string
+  default     = ""
 }
 
 variable "gridgain_config" {
   description = "GridGain config xml"
   type        = string
+  default     = ""
 }
 
 variable "ssl_enable" {

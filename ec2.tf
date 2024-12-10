@@ -1,5 +1,5 @@
 locals {
-  az_count = 2
+  az_count = length(var.zones)
   ami_id   = var.ami_id
   tags     = var.tags
 

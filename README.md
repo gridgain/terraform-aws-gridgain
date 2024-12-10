@@ -15,9 +15,9 @@
 | <a name="input_cloudwatch_loggroup_name"></a> [cloudwatch\_loggroup\_name](#input\_cloudwatch\_loggroup\_name) | Name of Cloudwatch Log Group to send logs to | `string` | `"/aws/gridgain"` | no |
 | <a name="input_cloudwatch_logs_enable"></a> [cloudwatch\_logs\_enable](#input\_cloudwatch\_logs\_enable) | Enable sending logs to Cloudwatch Logs | `bool` | `false` | no |
 | <a name="input_fullname"></a> [fullname](#input\_fullname) | Full name to be used in description of all resources | `string` | `"GridGain Cluster"` | no |
-| <a name="input_gridgain_config"></a> [gridgain\_config](#input\_gridgain\_config) | GridGain config xml | `string` | n/a | yes |
+| <a name="input_gridgain_config"></a> [gridgain\_config](#input\_gridgain\_config) | GridGain config xml | `string` | `""` | no |
 | <a name="input_gridgain_jetty_config"></a> [gridgain\_jetty\_config](#input\_gridgain\_jetty\_config) | GridGain Jetty config xml | `string` | `""` | no |
-| <a name="input_gridgain_license"></a> [gridgain\_license](#input\_gridgain\_license) | GridGain license xml | `string` | n/a | yes |
+| <a name="input_gridgain_license"></a> [gridgain\_license](#input\_gridgain\_license) | GridGain license xml | `string` | `""` | no |
 | <a name="input_gridgain_ssl_cert"></a> [gridgain\_ssl\_cert](#input\_gridgain\_ssl\_cert) | GridGain SSL certificate | `string` | `""` | no |
 | <a name="input_gridgain_ssl_key"></a> [gridgain\_ssl\_key](#input\_gridgain\_ssl\_key) | GridGain SSL key | `string` | `""` | no |
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | Instance type to be used for GridGain nodes | `string` | `"t3.medium"` | no |
@@ -38,12 +38,12 @@
 | <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key) | SSH public key used to connect to instances. If empty, none will be provisioned | `string` | `""` | no |
 | <a name="input_ssl_enable"></a> [ssl\_enable](#input\_ssl\_enable) | Whether SSL should be enabled | `bool` | `false` | no |
 | <a name="input_ssm_enable"></a> [ssm\_enable](#input\_ssm\_enable) | Enable secure session manager | `bool` | `true` | no |
-| <a name="input_subnet_cidrs"></a> [subnet\_cidrs](#input\_subnet\_cidrs) | List of 2 CIDRs for private subnets. Only 2 are supported | `list(string)` | <pre>[<br>  "10.0.0.0/19",<br>  "10.0.32.0/19"<br>]</pre> | no |
+| <a name="input_subnet_cidrs"></a> [subnet\_cidrs](#input\_subnet\_cidrs) | List of CIDRs for private subnets | `list(string)` | <pre>[<br>  "10.0.0.0/19",<br>  "10.0.32.0/19"<br>]</pre> | no |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | List of private subnet IDs to be used for deployment. If empty, module should provision new subnets | `list(string)` | `[]` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of additional tags to assign to resources | `map(string)` | `{}` | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | CIDR block for VPC | `string` | `"10.0.0.0/16"` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID to be deployed into. If empty, module should provision new VPC | `string` | `""` | no |
-| <a name="input_zones"></a> [zones](#input\_zones) | List of 2 availability zones to create VPC in. Only 2 are supported | `list(string)` | <pre>[<br>  "us-east-1a",<br>  "us-east-1b"<br>]</pre> | no |
+| <a name="input_zones"></a> [zones](#input\_zones) | List of availability zones to create VPC in | `list(string)` | <pre>[<br>  "us-east-1a",<br>  "us-east-1b"<br>]</pre> | no |
 
 ## Outputs
 
