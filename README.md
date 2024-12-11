@@ -12,7 +12,6 @@
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | AMI to be used in deployment, if empty, should default to latest | `string` | n/a | yes |
-| <a name="input_cloudwatch_loggroup_name"></a> [cloudwatch\_loggroup\_name](#input\_cloudwatch\_loggroup\_name) | Name of Cloudwatch Log Group to send logs to | `string` | `"/aws/gridgain"` | no |
 | <a name="input_cloudwatch_logs_enable"></a> [cloudwatch\_logs\_enable](#input\_cloudwatch\_logs\_enable) | Enable sending logs to Cloudwatch Logs | `bool` | `false` | no |
 | <a name="input_fullname"></a> [fullname](#input\_fullname) | Full name to be used in description of all resources | `string` | `"GridGain Cluster"` | no |
 | <a name="input_gridgain_config"></a> [gridgain\_config](#input\_gridgain\_config) | GridGain config xml | `string` | `""` | no |

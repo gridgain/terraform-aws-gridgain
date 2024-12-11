@@ -109,14 +109,7 @@ variable "nodes_count" {
 variable "ami_id" {
   description = "AMI to be used in deployment, if empty, should default to latest"
   type        = string
-  # default     = ""
 }
-
-# variable "gridgain_version" {
-#   description = "GridGain version to use when searching for AMI"
-#   type        = string
-#   default     = "8.9.9"
-# }
 
 variable "ssh_public_key" {
   description = "SSH public key used to connect to instances. If empty, none will be provisioned"
@@ -134,12 +127,6 @@ variable "cloudwatch_logs_enable" {
   description = "Enable sending logs to Cloudwatch Logs"
   type        = bool
   default     = false
-}
-
-variable "cloudwatch_loggroup_name" {
-  description = "Name of Cloudwatch Log Group to send logs to"
-  type        = string
-  default     = "/aws/gridgain"
 }
 
 variable "fullname" {

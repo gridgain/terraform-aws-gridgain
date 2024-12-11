@@ -67,8 +67,7 @@ resource "aws_instance" "this" {
     keystore_password     = var.keystore_password
     gridgain_jetty_config = base64gzip(var.gridgain_jetty_config)
 
-    cloudwatch_logs_enable   = var.cloudwatch_logs_enable
-    cloudwatch_loggroup_name = var.cloudwatch_loggroup_name
+    cloudwatch_logs_enable = var.cloudwatch_logs_enable
   })
   user_data_replace_on_change = true
   availability_zone           = var.zones[count.index % local.az_count]
