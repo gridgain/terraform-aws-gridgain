@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/util
+       http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+
+    <bean id="grid.cfg" class="org.apache.ignite.configuration.IgniteConfiguration">
+        <property name="workDirectory" value="/opt/gridgain/work"/>
+
+        <property name="sslContextFactory">
+            <bean class="org.apache.ignite.ssl.SslContextFactory">
+                <property name="keyStoreFilePath" value="/opt/gridgain/ssl/server.jks"/>
+                <property name="keyStorePassword" value="{{ keystore_password }}"/>
+                <property name="protocol" value="TLSv1.3"/>
+                <property name="needClientAuth" value="false"/>
+            </bean>
+        </property>
+
+        <property name="connectorConfiguration">
+            <bean class="org.apache.ignite.configuration.ConnectorConfiguration">
+                <property name="sslEnabled" value="true"/>
+                <property name="jettyPath" value="/opt/gridgain/config/jetty.xml" />
+            </bean>
+        </property>
+
+
+        <property name="clientConnectorConfiguration">
+            <bean class="org.apache.ignite.configuration.ClientConnectorConfiguration">
+                <property name="sslEnabled" value="true"/>
+                <property name="thinClientConfiguration">
+                    <bean class="org.apache.ignite.configuration.ThinClientConfiguration">
+                        <property name="maxActiveComputeTasksPerConnection" value="100" />
+                    </bean>
+                </property>
+            </bean>
+        </property>
+
+        <property name="communicationSpi">
+            <bean class="org.apache.ignite.spi.communication.tcp.TcpCommunicationSpi">
+                <property name="localPort" value="47100"/>
+                <property name="localPortRange" value="10"/>
+            </bean>
+        </property>
+
+        <property name="igniteInstanceName" value="gridgain-node"/>
+
+        <property name="gridLogger">
+            <bean class="org.apache.ignite.logger.log4j2.Log4J2Logger">
+                <constructor-arg type="java.lang.String" value="/opt/gridgain/config/log4j2.xml"/>
+            </bean>
+        </property>
+
+        <property name="deploymentSpi">
+            <bean class="org.gridgain.control.agent.processor.deployment.ManagedDeploymentSpi"/>
+        </property>
+
+        <property name="pluginConfigurations">
+            <list>
+                <bean class="org.gridgain.grid.configuration.GridGainConfiguration">
+                    <property name="licenseUrl" value="file:///opt/gridgain/config/license.xml"/>
+                    <property name="rollingUpdatesEnabled" value="true"/>
+
+                    <property name="snapshotConfiguration">
+                        <bean class="org.gridgain.grid.configuration.SnapshotConfiguration">
+                            <property name="pointInTimeRecoveryEnabled" value="false"/>
+                            <property name="snapshotOperationParallelism" value="4"/>
+                            <property name="compressionLevel" value="-1"/>
+                            <property name="snapshotsPath" value="/opt/gridgain/snapshots"/>
+                            <property name="snapshotProgressThrottlingInterval" value="-1"/>
+                        </bean>
+                    </property>
+                </bean>
+            </list>
+        </property>
+
+
+        <property name="dataStorageConfiguration">
+            <bean class="org.apache.ignite.configuration.DataStorageConfiguration">
+                <property name="storagePath" value="/opt/gridgain/data/db"/>
+                <property name="defaultDataRegionConfiguration">
+                    <bean class="org.apache.ignite.configuration.DataRegionConfiguration">
+                        <property name="persistenceEnabled" value="true"/>
+                    </bean>
+                </property>
+            </bean>
+        </property>
+
+        <property name="discoverySpi">
+            <bean class="org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi">
+                <property name="localPort" value="47500"/>
+                <property name="localPortRange" value="1"/>
+                <property name="ipFinder">
+                    <bean class="org.apache.ignite.spi.discovery.tcp.ipfinder.s3.TcpDiscoveryS3IpFinder">
+                        <property name="awsCredentialsProvider" ref="aws.creds"/>
+                        <property name="bucketName" value="gridgain-s3"/>
+                    </bean>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- Instance Profile based credentials -->
+    <bean id="aws.creds" class="com.amazonaws.auth.InstanceProfileCredentialsProvider">
+        <constructor-arg value="false" />
+    </bean>
+</beans>

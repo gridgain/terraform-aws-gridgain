@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<gridgain-license version="2.1">
+    <id>XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX</id>
+    <issue-date>XX/XX/XXXX</issue-date>
+    <maintenance-time>0</maintenance-time>
+    <user-org>Gridgain Systems</user-org>
+    <license-note>Gridgain license for Gridgain Systems</license-note>
+    <user-www>https://XXXXXXXXX/</user-www>
+    <user-email>XXXXXXXX</user-email>
+    <user-name>XXXXXXXXX</user-name>
+    <type>XXX</type>
+    <expire-date>XX/XX/XXXX</expire-date>
+    <max-nodes>0</max-nodes>
+    <max-cpus>0</max-cpus>
+    <max-computers>0</max-computers>
+    <grace-period>120</grace-period>
+    <max-uptime>0</max-uptime>
+    <signature>XXXXXXXXXXXXXXXXXXXXXXXXX</signature>
+    <signature2>XXXXXXXXXXXXXXXXXXXXXXXXX</signature2>
+    <enabled-feature name="ultimate"/>
+    <enabled-feature name="signature2"/>
+    <limit name="max-pds-size" value="0.0"/>
+    <limit name="max-ram-size" value="0.0"/>
+    <limit name="max-heap-size" value="0.0"/>
+    <limit name="max-sum-of-heap-and-offheap-size" value="0.0"/>
+    <limit name="max-offheap-size" value="0.0"/>
+    <profile name="servers">
+        <client-mode>false</client-mode>
+        <max-nodes>0</max-nodes>
+        <max-cpus>0</max-cpus>
+        <max-computers>0</max-computers>
+    </profile>
+    <profile name="clients">
+        <client-mode>true</client-mode>
+        <max-nodes>0</max-nodes>
+        <max-cpus>0</max-cpus>
+        <max-computers>0</max-computers>
+    </profile>
+</gridgain-license>
