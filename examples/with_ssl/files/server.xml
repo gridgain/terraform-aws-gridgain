@@ -28,7 +28,6 @@
             </bean>
         </property>
 
-
         <property name="clientConnectorConfiguration">
             <bean class="org.apache.ignite.configuration.ClientConnectorConfiguration">
                 <property name="sslEnabled" value="true"/>

@@ -24,6 +24,7 @@ module "gridgain" {
 
   s3_enable  = true
   ssm_enable = true
+  ssl_enable = true
 }
 
 
