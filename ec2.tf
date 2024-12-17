@@ -1,5 +1,5 @@
 locals {
-  az_count = 2
+  az_count = length(var.zones)
   ami_id   = var.ami_id
   tags     = var.tags
 
@@ -11,7 +11,9 @@ locals {
     public_ip  = var.public_access_enable ? aws_eip.eip[i].public_ip : tostring(i),
     private_ip = element(tolist(aws_network_interface.eni[i].private_ips), 0)
   }]
-  ip_map = { for item in local.ip_zip : item.public_ip => item.private_ip }
+  ip_map                   = { for item in local.ip_zip : item.public_ip => item.private_ip }
+  gridgain_license_defined = length(trimspace(var.gridgain_license)) > 0
+  gridgain_config_defined  = length(trimspace(var.gridgain_config)) > 0
 }
 
 data "aws_region" "this" {}
@@ -50,6 +52,9 @@ resource "aws_instance" "this" {
   instance_type = var.instance_type
 
   user_data = templatefile("${path.module}/templates/user-data.yaml", {
+    gridgain_license_defined = local.gridgain_license_defined
+    gridgain_config_defined  = local.gridgain_config_defined
+
     gridgain_license = base64gzip(var.gridgain_license)
     gridgain_config  = base64gzip(var.gridgain_config)
     public_ips       = local.public_ips
@@ -61,9 +66,6 @@ resource "aws_instance" "this" {
     gridgain_ssl_key      = base64gzip(var.gridgain_ssl_key)
     keystore_password     = var.keystore_password
     gridgain_jetty_config = base64gzip(var.gridgain_jetty_config)
-
-    cloudwatch_logs_enable   = var.cloudwatch_logs_enable
-    cloudwatch_loggroup_name = var.cloudwatch_loggroup_name
   })
   user_data_replace_on_change = true
   availability_zone           = var.zones[count.index % local.az_count]

@@ -17,13 +17,13 @@ variable "vpc_cidr" {
 }
 
 variable "subnet_cidrs" {
-  description = "List of 2 CIDRs for private subnets. Only 2 are supported"
+  description = "List of CIDRs for private subnets"
   type        = list(string)
   default     = ["10.0.0.0/19", "10.0.32.0/19"]
 }
 
 variable "zones" {
-  description = "List of 2 availability zones to create VPC in. Only 2 are supported"
+  description = "List of availability zones to create VPC in"
   type        = list(string)
   default     = ["us-east-1a", "us-east-1b"]
 }
@@ -73,13 +73,13 @@ variable "instance_type" {
 variable "root_volume_size" {
   description = "Size of root volume in GB for GridGain nodes"
   type        = number
-  default     = 50
+  default     = 128
 }
 
 variable "root_volume_type" {
   description = "Type of root volume for GridGain nodes"
   type        = string
-  default     = "gp2"
+  default     = "gp3"
 }
 
 variable "root_volume_throughput" {
@@ -109,14 +109,7 @@ variable "nodes_count" {
 variable "ami_id" {
   description = "AMI to be used in deployment, if empty, should default to latest"
   type        = string
-  # default     = ""
 }
-
-# variable "gridgain_version" {
-#   description = "GridGain version to use when searching for AMI"
-#   type        = string
-#   default     = "8.9.9"
-# }
 
 variable "ssh_public_key" {
   description = "SSH public key used to connect to instances. If empty, none will be provisioned"
@@ -134,12 +127,6 @@ variable "cloudwatch_logs_enable" {
   description = "Enable sending logs to Cloudwatch Logs"
   type        = bool
   default     = false
-}
-
-variable "cloudwatch_loggroup_name" {
-  description = "Name of Cloudwatch Log Group to send logs to"
-  type        = string
-  default     = "/aws/gridgain"
 }
 
 variable "fullname" {
@@ -163,11 +150,13 @@ variable "tags" {
 variable "gridgain_license" {
   description = "GridGain license xml"
   type        = string
+  default     = ""
 }
 
 variable "gridgain_config" {
   description = "GridGain config xml"
   type        = string
+  default     = ""
 }
 
 variable "ssl_enable" {

@@ -1,8 +1,9 @@
+%{ if gridgain_config_defined ~}
 #cloud-config
 # vim: syntax=yaml
 
 write_files:
-%{ if gridgain_license ~}
+%{ if gridgain_license_defined ~}
   - path: /opt/gridgain/config/license.xml
     encoding: gzip
     content: !!binary |
@@ -32,13 +33,13 @@ write_files:
 %{ if ssl_enable ~}
       -Djavax.net.ssl.keyStore=/opt/gridgain/ssl/server.jks \
       -Djavax.net.ssl.keyStorePassword=${keystore_password} \
-%{~ endif ~}
+%{ endif ~}
 %{ if can(public_ips[node_id]) ~}
       -Djava.rmi.server.hostname=${public_ips[node_id]}
-%{~ endif ~}
-%{ if gridgain_license ~}
+%{ endif ~}
+%{ if gridgain_license_defined ~}
       CP=-cp /opt/gridgain/binaries/latest/libs/*:/opt/gridgain/binaries/latest/libs/gridgain-ultimate/*:/opt/gridgain/binaries/latest/libs/ignite-control-utility/*:/opt/gridgain/binaries/latest/libs/ignite-indexing/*:/opt/gridgain/binaries/latest/libs/ignite-opencensus/*:/opt/gridgain/binaries/latest/libs/ignite-spring/*:/opt/gridgain/binaries/latest/libs/licenses/*:/opt/gridgain/binaries/latest/libs/ignite-rest-http/*:/opt/gridgain/binaries/latest/libs/ignite-log4j2/*:/opt/gridgain/binaries/latest/libs/control-center-agent/*:/opt/gridgain/binaries/latest/libs/ignite-schedule/*:/opt/gridgain/binaries/latest/libs/ignite-aws/*
-%{~ endif ~}
+%{ endif ~}
 
 runcmd:
 %{ if ssl_enable ~}
@@ -50,3 +51,4 @@ runcmd:
   - rm -f /opt/gridgain/ssl/server.crt /opt/gridgain/ssl/server.key
   - systemctl restart gridgain
   - systemctl enable gridgain
+%{ endif ~}

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
+    <Arg name="threadpool">
+        <!-- Default queued blocking thread pool -->
+        <New class="org.eclipse.jetty.util.thread.QueuedThreadPool">
+            <Set name="minThreads">10</Set>
+            <Set name="maxThreads">200</Set>
+        </New>
+    </Arg>
+    <New id="httpsCfg" class="org.eclipse.jetty.server.HttpConfiguration">
+        <Set name="secureScheme">https</Set>
+        <Set name="sendServerVersion">true</Set>
+        <Set name="sendDateHeader">true</Set>
+        <Call name="addCustomizer">
+            <Arg>
+                <New class="org.eclipse.jetty.server.SecureRequestCustomizer" />
+            </Arg>
+        </Call>
+    </New>
+    <New id="sslContextFactory" class="org.eclipse.jetty.util.ssl.SslContextFactory$Server">
+        <Set name="keyStorePath">/opt/gridgain/ssl/server.jks</Set>
+        <Set name="keyStorePassword">{{ keystore_password }}</Set>
+        <Set name="keyManagerPassword">{{ keystore_password }}</Set>
+    </New>
+    <Call name="addConnector">
+        <Arg>
+            <New class="org.eclipse.jetty.server.ServerConnector">
+                <Arg>
+                    <Ref refid="Server" />
+                </Arg>
+                <Arg>
+                    <Array type="org.eclipse.jetty.server.ConnectionFactory">
+                        <Item>
+                            <New class="org.eclipse.jetty.server.SslConnectionFactory">
+                                <Arg>
+                                    <Ref refid="sslContextFactory" />
+                                </Arg>
+                                <Arg>http/1.1</Arg>
+                            </New>
+                        </Item>
+                        <Item>
+                            <New class="org.eclipse.jetty.server.HttpConnectionFactory">
+                                <Arg>
+                                    <Ref refid="httpsCfg" />
+                                </Arg>
+                            </New>
+                        </Item>
+                    </Array>
+                </Arg>
+                <Set name="port">
+                    8080
+                </Set>
+                <Set name="idleTimeout">30000</Set>
+                <Set name="reuseAddress">true</Set>
+            </New>
+        </Arg>
+    </Call>
+    <Set name="handler">
+        <New id="Handlers" class="org.eclipse.jetty.server.handler.HandlerCollection">
+            <Set name="handlers">
+                <Array type="org.eclipse.jetty.server.Handler">
+                    <Item>
+                        <New id="Contexts" class="org.eclipse.jetty.server.handler.ContextHandlerCollection" />
+                    </Item>
+                </Array>
+            </Set>
+        </New>
+    </Set>
+    <Set name="stopAtShutdown">false</Set>
+</Configure>
