@@ -77,6 +77,19 @@ data "aws_iam_policy_document" "this" {
     ]
     resources = [aws_lb.this.arn]
   }
+
+  statement {
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogStreams"
+    ]
+
+    resources = [
+      "arn:aws:logs:*:*:log-group:/gridgain/*",
+    ]
+  }
 }
 
 resource "aws_iam_policy" "this" {
